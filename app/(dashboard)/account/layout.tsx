@@ -1,14 +1,13 @@
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 
 export default async function AccountLayout({ children }: { children: React.ReactNode }) {
-  const session = await getServerSession(authOptions)
+  const session = await auth()
   if (!session) redirect('/auth/login?callbackUrl=/account/orders')
 
   const navItems = [
-    { href: '/account/orders', label: '📋 My Orders' },
+    { href: '/account/orders',  label: '📋 My Orders' },
     { href: '/account/profile', label: '👤 Profile' },
   ]
 
