@@ -1,6 +1,7 @@
 {
-  "name": "taxi-service",
-  "version": "0.1.0",
+  "name": "cleaning-service-pro",
+  "version": "1.0.0",
+  "description": "Production-ready cleaning service platform with booking, CRM, CMS, Stripe payments, cash payment option, admin dashboard and license protection",
   "private": true,
   "scripts": {
     "dev": "next dev",
