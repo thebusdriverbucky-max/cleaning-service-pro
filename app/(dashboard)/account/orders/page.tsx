@@ -1,4 +1,5 @@
-import { auth } from '@/lib/auth'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -12,7 +13,7 @@ const statusColors: Record<string, string> = {
 }
 
 export default async function AccountOrdersPage() {
-  const session = await auth()
+  const session = await getServerSession(authOptions)
   if (!session?.user?.email) redirect('/auth/login')
 
   const user = await prisma.user.findUnique({
@@ -60,7 +61,7 @@ export default async function AccountOrdersPage() {
                   </span>
                   <span className={`text-xs px-2 py-1 rounded-full font-medium ${order.paymentMethod === 'STRIPE' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'
                     }`}>
-                    {order.paymentMethod === 'STRIPE' ? (order.paymentStatus === 'PAID' ? '💳 Paid' : '💳 Unpaid') : '💵 Cash'}
+                    {order.paymentMethod === 'STRIPE' ? '💳 Paid' : '💵 Cash'}
                   </span>
                 </div>
                 <h3 className="font-semibold text-slate-900">
@@ -90,4 +91,3 @@ export default async function AccountOrdersPage() {
     </div>
   )
 }
-
