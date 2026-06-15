@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
           paymentStatus: 'PAID',
           paidAt: new Date(),
           status: 'CONFIRMED',
-          stripePaymentIntentId: session.payment_intent,
+          stripePaymentId: session.payment_intent,
         },
         include: {
           user: true,
