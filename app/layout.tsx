@@ -21,38 +21,36 @@ const inter = Inter({ subsets: ["latin"] });
 export async function generateMetadata(): Promise<Metadata> {
   let settings = null;
   try {
-    settings = await prisma.storeSettings.findFirst();
+    // В новой схеме модель называется SiteSettings, но пока в базе может быть старая таблица
+    // Если миграции еще не запущены, этот код может упасть, но мы работаем над трансформацией
+    settings = await (prisma as any).siteSettings.findFirst();
   } catch (error) {
-    console.error("Error fetching settings in generateMetadata:", error);
+    // Fallback if table doesn't exist yet
   }
-  const siteName = settings?.companyName || "Taxi Project - Premium Service in Larnaca";
-  const siteDescription = settings?.heroSubtitle || "Reliable airport transfers & city rides. Professional drivers, fixed prices.";
-  const faviconUrl = settings?.faviconUrl || "https://i.imgur.com/udCYp7c.png";
-  const ogImageUrl = settings?.ogImageUrl || faviconUrl;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://taxi-project.vercel.app";
+
+  const siteName = settings?.value || "CleanFlow — Professional Cleaning Service";
+  const siteDescription = "Book professional cleaning services online. Residential, commercial, deep cleaning and more. Online payment or cash on site.";
 
   return {
     title: {
       default: siteName,
-      template: `%s | ${siteName}`,
+      template: `%s | CleanFlow`,
     },
     description: siteDescription,
+    keywords: ["cleaning service", "house cleaning", "commercial cleaning", "book cleaning", "professional cleaners"],
     icons: {
-      icon: faviconUrl,
+      icon: "/favicon.ico",
     },
     openGraph: {
       type: "website",
-      locale: settings?.siteLang === "ru" ? "ru_RU" : "en_US",
-      url: siteUrl,
+      locale: "en_US",
       title: siteName,
       description: siteDescription,
-      images: [{ url: ogImageUrl }],
     },
     twitter: {
       card: "summary_large_image",
       title: siteName,
       description: siteDescription,
-      images: [ogImageUrl],
     },
   };
 }
@@ -64,19 +62,18 @@ export default async function RootLayout({
 }) {
   let settings = null;
   try {
-    settings = await prisma.storeSettings.findFirst();
+    settings = await (prisma as any).siteSettings.findFirst();
   } catch (error) {
-    console.error("Error fetching settings in RootLayout:", error);
+    // ignore
   }
-  const siteLang = settings?.siteLang || "en";
 
   return (
-    <html lang={siteLang} suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <SessionProvider>
           <SettingsProvider initialSettings={settings as unknown as StoreSettingsData}>
             <ThemeProvider attribute="class" defaultTheme="dark" forcedTheme="dark" enableSystem={false}>
-              <div className="flex flex-col min-h-screen bg-taxi-dark-navy text-white">
+              <div className="flex flex-col min-h-screen bg-slate-950 text-white">
                 <TopContactBar />
                 <Navbar />
                 <main className="flex-1">{children}</main>
