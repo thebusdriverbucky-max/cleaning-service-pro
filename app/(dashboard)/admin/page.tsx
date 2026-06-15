@@ -1,113 +1,119 @@
-// app/(dashboard)/admin/page.tsx
-import { auth } from "@/lib/auth"; // Импортируем auth из вашей конфигурации
-import { redirect } from "next/navigation";
-import Link from "next/link";
-import { Car, Tag, BarChart3, Ticket, Settings, MapPin, Star, UserCircle } from "lucide-react";
+import { getAdminStats, getRecentOrders } from '@/lib/admin'
+import Link from 'next/link'
 
-export const dynamic = 'force-dynamic';
+const statusColors: Record<string, string> = {
+  PENDING: 'bg-yellow-100 text-yellow-800',
+  CONFIRMED: 'bg-blue-100 text-blue-800',
+  IN_PROGRESS: 'bg-purple-100 text-purple-800',
+  COMPLETED: 'bg-green-100 text-green-800',
+  CANCELLED: 'bg-red-100 text-red-800',
+}
 
 export default async function AdminDashboard() {
-  const session = await auth(); // Используем auth() вместо getServerSession
+  const [stats, recentOrders] = await Promise.all([
+    getAdminStats(),
+    getRecentOrders(8),
+  ])
 
-  if (session?.user?.role !== "ADMIN") {
-    redirect("/");
-  }
-
-  const cards = [
-    {
-      href: "/admin/orders",
-      title: "Trips",
-      icon: MapPin,
-      description: "View and manage trip bookings",
-      color: "text-green-500",
-    },
-    {
-      href: "/admin/vehicles",
-      title: "Fleet",
-      icon: Car,
-      description: "Manage your vehicle fleet",
-      color: "text-indigo-500",
-    },
-    {
-      href: "/admin/drivers",
-      title: "Drivers",
-      icon: UserCircle,
-      description: "Manage your professional drivers",
-      color: "text-amber-500",
-    },
-    {
-      href: "/admin/tariffs",
-      title: "Tariff Plans",
-      icon: Tag,
-      description: "Manage pricing and service types",
-      color: "text-blue-500",
-    },
-    {
-      href: "/admin/discounts",
-      title: "Discounts",
-      icon: Ticket,
-      description: "Manage promo codes and discounts",
-      color: "text-orange-500",
-    },
-    {
-      href: "/admin/analytics",
-      title: "Analytics",
-      icon: BarChart3,
-      description: "Trip and performance metrics",
-      color: "text-purple-500",
-    },
-    {
-      href: "/admin/reviews",
-      title: "Reviews",
-      icon: Star,
-      description: "Manage customer reviews",
-      color: "text-yellow-500",
-    },
-    {
-      href: "/admin/settings",
-      title: "Settings",
-      icon: Settings,
-      description: "Configure your service settings",
-      color: "text-gray-400",
-    },
-  ];
+  const kpis = [
+    { label: 'Total Orders', value: stats.totalOrders, icon: '📋', color: 'bg-slate-50' },
+    { label: 'Pending', value: stats.pendingOrders, icon: '⏳', color: 'bg-yellow-50' },
+    { label: 'Completed', value: stats.completedOrders, icon: '✅', color: 'bg-green-50' },
+    { label: 'Total Revenue', value: `$${stats.totalRevenue.toFixed(2)}`, icon: '💰', color: 'bg-emerald-50' },
+    { label: 'Paid Online', value: `$${stats.paidRevenue.toFixed(2)}`, icon: '💳', color: 'bg-blue-50' },
+    { label: 'Customers', value: stats.totalCustomers, icon: '👤', color: 'bg-indigo-50' },
+    { label: 'Cleaners', value: stats.totalCleaners, icon: '🧹', color: 'bg-teal-50' },
+    { label: 'Cancelled', value: stats.cancelledOrders, icon: '❌', color: 'bg-red-50' },
+  ]
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <h1 className="text-4xl font-extrabold mb-10 bg-gradient-to-l from-[#FCF6BA] to-[#BF953F] bg-clip-text text-transparent">
-        Admin Dashboard
-      </h1>
+    <div className="p-6 max-w-7xl mx-auto space-y-8">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+        <p className="text-slate-500 text-sm mt-1">Overview of your cleaning business</p>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {cards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <Link key={card.href} href={card.href} className="group">
-              <div className="h-full bg-[#1e293b]/50 backdrop-blur-md rounded-2xl border border-white/10 p-8 hover:border-white/20 hover:shadow-[0_0_30px_rgba(245,158,11,0.15)] transition-all duration-500 hover:scale-[1.02] flex flex-col justify-between relative overflow-hidden">
-                {/* Subtle glow effect on hover */}
-                <div className="absolute -right-10 -top-10 w-32 h-32 bg-taxi-gold-DEFAULT/5 rounded-full blur-3xl group-hover:bg-taxi-gold-DEFAULT/10 transition-colors duration-500" />
+      {/* KPI Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {kpis.map(kpi => (
+          <div key={kpi.label} className={`${kpi.color} rounded-xl p-4 border border-slate-100`}>
+            <div className="text-2xl mb-2">{kpi.icon}</div>
+            <div className="text-2xl font-bold text-slate-900 tabular-nums">{kpi.value}</div>
+            <div className="text-xs text-slate-500 mt-1">{kpi.label}</div>
+          </div>
+        ))}
+      </div>
 
-                <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-2xl font-bold bg-gradient-to-l from-[#FCF6BA] to-[#BF953F] bg-clip-text text-transparent">
-                      {card.title}
-                    </h3>
-                    <div className={`p-3 rounded-xl bg-white/5 group-hover:bg-white/10 transition-all duration-300 group-hover:rotate-6 ${card.color}`}>
-                      <Icon className="w-8 h-8" />
-                    </div>
-                  </div>
-                  <p className="text-gray-400 text-lg leading-relaxed group-hover:text-gray-200 transition-colors duration-300">
-                    {card.description}
-                  </p>
-                </div>
-                <div className="mt-8 flex items-center text-taxi-gold-DEFAULT font-semibold opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-[-10px] group-hover:translate-x-0 relative z-10">
-                  Manage {card.title} <span className="ml-2 transition-transform group-hover:translate-x-1">&rarr;</span>
-                </div>
-              </div>
-            </Link>
-          );
-        })}
+      {/* Recent Orders */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-slate-900">Recent Orders</h2>
+          <Link href="/admin/orders" className="text-sm text-emerald-600 hover:underline">
+            View all →
+          </Link>
+        </div>
+        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-slate-50 border-b border-slate-200">
+              <tr>
+                <th className="text-left px-4 py-3 font-medium text-slate-600">Order</th>
+                <th className="text-left px-4 py-3 font-medium text-slate-600">Customer</th>
+                <th className="text-left px-4 py-3 font-medium text-slate-600">Service</th>
+                <th className="text-left px-4 py-3 font-medium text-slate-600">Date</th>
+                <th className="text-left px-4 py-3 font-medium text-slate-600">Total</th>
+                <th className="text-left px-4 py-3 font-medium text-slate-600">Payment</th>
+                <th className="text-left px-4 py-3 font-medium text-slate-600">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {recentOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-12 text-slate-400">
+                    No orders yet
+                  </td>
+                </tr>
+              ) : (
+                recentOrders.map(order => (
+                  <tr key={order.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-4 py-3">
+                      <Link href={`/admin/orders/${order.id}`} className="font-mono text-emerald-600 hover:underline">
+                        #{order.orderNumber.slice(0, 8).toUpperCase()}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="font-medium text-slate-900">{order.user?.name || '—'}</div>
+                      <div className="text-slate-400 text-xs">{order.user?.email}</div>
+                    </td>
+                    <td className="px-4 py-3">
+                      {order.serviceType?.icon} {order.serviceType?.name}
+                    </td>
+                    <td className="px-4 py-3 tabular-nums text-slate-600">
+                      {new Date(order.scheduledDate).toLocaleDateString()}
+                      <span className="text-slate-400 ml-1">{order.scheduledTime}</span>
+                    </td>
+                    <td className="px-4 py-3 font-semibold tabular-nums text-slate-900">
+                      ${order.totalPrice.toFixed(2)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${order.paymentMethod === 'STRIPE'
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'bg-amber-100 text-amber-700'
+                        }`}>
+                        {order.paymentMethod === 'STRIPE' ? '💳 Stripe' : '💵 Cash'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${statusColors[order.status] || 'bg-slate-100 text-slate-700'}`}>
+                        {order.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
-  );
+  )
 }
