@@ -47,8 +47,48 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    // If CASH — return directly
     if (paymentMethod === 'CASH') {
+      // Send confirmation email for cash orders
+      try {
+        const fullOrder = await prisma.cleaningOrder.findUnique({
+          where: { id: order.id },
+          include: { user: true, serviceType: true },
+        })
+        if (fullOrder) {
+          const { sendEmail } = await import('@/lib/email')
+          await sendEmail({
+            to: email,
+            subject: `📋 Booking Received — ${service.name}`,
+            html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h2>✅ Booking Received!</h2>
+              <p>Hi ${name}, your cleaning booking has been received.</p>
+              <p><strong>Order:</strong> #${order.orderNumber.slice(0, 8).toUpperCase()}</p>
+              <p><strong>Service:</strong> ${service.icon} ${service.name}</p>
+              <p><strong>Date:</strong> ${scheduledDate} at ${scheduledTime}</p>
+              <p><strong>Address:</strong> ${addressStreet}, ${addressCity}</p>
+              <p><strong>Total:</strong> $${parseFloat(totalPrice).toFixed(2)} — 💵 Cash on arrival</p>
+              <p style="color: #64748b; font-size: 14px;">Our team will confirm your booking shortly.</p>
+            </div>
+          `,
+          })
+          // Notify admin
+          const adminEmail = process.env.ADMIN_EMAIL
+          if (adminEmail) {
+            await sendEmail({
+              to: adminEmail,
+              subject: `🆕 New Cash Order #${order.orderNumber.slice(0, 8).toUpperCase()}`,
+              html: `<p>New cash booking from ${name} (${email})</p>
+                   <p>Service: ${service.name} | Date: ${scheduledDate} ${scheduledTime}</p>
+                   <p>Address: ${addressStreet}, ${addressCity}</p>
+                   <p>Total: $${parseFloat(totalPrice).toFixed(2)}</p>
+                   <a href="${process.env.NEXT_PUBLIC_APP_URL}/admin/orders">View in Admin →</a>`,
+            })
+          }
+        }
+      } catch (emailErr) {
+        console.error('Email failed (non-critical):', emailErr)
+      }
       return NextResponse.json({ orderNumber: order.orderNumber })
     }
 
@@ -86,3 +126,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: err.message || 'Internal error' }, { status: 500 })
   }
 }
+
