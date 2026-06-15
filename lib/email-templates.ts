@@ -122,7 +122,7 @@ export const getOrderStatusUpdateEmailHtml = (
   trackingNumber?: string | null
 ): string => {
   const storeUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || '';
-  const orderUrl = storeUrl ? `${storeUrl}/trips/${orderId}` : '#';
+  const orderUrl = storeUrl ? `${storeUrl}/orders/${orderId}` : '#';
 
   const statusColors: Record<string, { bg: string; color: string; emoji: string }> = {
     CONFIRMED: { bg: '#16a34a22', color: '#4ade80', emoji: '✅' },

@@ -39,7 +39,7 @@ export default function TripDetailsPage({
 
   const fetchTrip = useCallback(async () => {
     try {
-      const res = await fetch(`/api/trips/${params.id}`);
+      const res = await fetch(`/api/orders/${params.id}`);
       if (!res.ok) {
         if (res.status === 404) throw new Error("Trip not found");
         throw new Error("Failed to fetch trip");
@@ -297,7 +297,7 @@ export default function TripDetailsPage({
         <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center">
           {isAuthenticated ? (
             // Авторизованный пользователь — показываем My Trips
-            <Link href="/trips" className="w-full sm:w-auto">
+            <Link href="/orders" className="w-full sm:w-auto">
               <button className="w-full sm:w-auto bg-white/10 hover:bg-white/20 border border-white/20 hover:border-taxi-gold-DEFAULT/40 text-gray-300 hover:text-white px-6 py-3 rounded-xl transition-all font-medium">
                 My Trips
               </button>

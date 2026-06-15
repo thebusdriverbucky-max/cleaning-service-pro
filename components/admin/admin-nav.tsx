@@ -20,7 +20,7 @@ export function AdminNav() {
 
   const navLinks = [
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/admin/trips", label: "Trips", icon: MapPin },
+    { href: "/admin/orders", label: "Trips", icon: MapPin },
     { href: "/admin/vehicles", label: "Fleet", icon: Car },
     { href: "/admin/drivers", label: "Drivers", icon: UserCircle },
     { href: "/admin/tariffs", label: "Tariff Plans", icon: Tag },

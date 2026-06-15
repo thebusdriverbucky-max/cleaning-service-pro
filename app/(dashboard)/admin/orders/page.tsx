@@ -1,4 +1,4 @@
-// app/(dashboard)/admin/trips/page.tsx
+// app/(dashboard)/admin/orders/page.tsx
 
 "use client";
 
@@ -44,7 +44,7 @@ export default function AdminTripsPage() {
 
   const fetchTrips = async () => {
     try {
-      const response = await fetch("/api/trips");
+      const response = await fetch("/api/orders");
       const data = await response.json();
       setTrips(data);
       setCurrentPage(1);
@@ -79,7 +79,7 @@ export default function AdminTripsPage() {
 
   const handleStatusUpdate = async (tripId: string, status: string) => {
     try {
-      const response = await fetch(`/api/trips/${tripId}`, {
+      const response = await fetch(`/api/orders/${tripId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
@@ -97,7 +97,7 @@ export default function AdminTripsPage() {
     if (!selectedTrip || !selectedVehicleId) return;
 
     try {
-      const response = await fetch(`/api/trips/${selectedTrip.id}`, {
+      const response = await fetch(`/api/orders/${selectedTrip.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ vehicleId: selectedVehicleId }),
@@ -115,7 +115,7 @@ export default function AdminTripsPage() {
   const handleAssignDriver = async () => {
     if (!selectedTrip) return;
     try {
-      const res = await fetch(`/api/trips/${selectedTrip.id}`, {
+      const res = await fetch(`/api/orders/${selectedTrip.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ driverId: selectedDriverId || null }),

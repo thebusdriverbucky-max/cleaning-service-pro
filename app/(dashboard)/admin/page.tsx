@@ -15,7 +15,7 @@ export default async function AdminDashboard() {
 
   const cards = [
     {
-      href: "/admin/trips",
+      href: "/admin/orders",
       title: "Trips",
       icon: MapPin,
       description: "View and manage trip bookings",

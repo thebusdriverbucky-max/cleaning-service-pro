@@ -73,8 +73,8 @@ export function Navbar() {
             </Link>
             {session && (
               <Link
-                href="/trips"
-                className={`text-lg font-medium transition-colors relative after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:bg-white after:transition-all after:duration-300 ${pathname.startsWith("/trips")
+                href="/orders"
+                className={`text-lg font-medium transition-colors relative after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:bg-white after:transition-all after:duration-300 ${pathname.startsWith("/orders")
                   ? "text-white after:w-full"
                   : "text-white/70 hover:text-white after:w-0 hover:after:w-full"
                   }`}
@@ -152,7 +152,7 @@ export function Navbar() {
                         </Link>
                       )}
                       <Link
-                        href="/trips"
+                        href="/orders"
                         className="block px-4 py-2 text-base text-gray-300 hover:text-taxi-gold-DEFAULT hover:bg-white/5"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
@@ -220,8 +220,8 @@ export function Navbar() {
               )}
               {session && (
                 <Link
-                  href="/trips"
-                  className={`text-lg font-medium transition-colors w-fit relative after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:bg-white after:transition-all after:duration-300 ${pathname.startsWith("/trips")
+                  href="/orders"
+                  className={`text-lg font-medium transition-colors w-fit relative after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:bg-white after:transition-all after:duration-300 ${pathname.startsWith("/orders")
                     ? "text-white after:w-full"
                     : "text-white/70 hover:text-white after:w-0 hover:after:w-full"
                     }`}

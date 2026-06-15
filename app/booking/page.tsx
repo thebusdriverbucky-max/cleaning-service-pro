@@ -344,7 +344,7 @@ export default function BookingPage() {
         paymentMethod: paymentMethod
       };
 
-      const response = await fetch("/api/trips", {
+      const response = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bookingData),
@@ -362,7 +362,7 @@ export default function BookingPage() {
       if (result.url) {
         window.location.href = result.url;
       } else {
-        router.push(`/trips/${result.tripId}?success=true`);
+        router.push(`/orders/${result.tripId}?success=true`);
       }
     } catch (error: any) {
       console.error("Booking error:", error);

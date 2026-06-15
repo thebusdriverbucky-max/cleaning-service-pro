@@ -63,7 +63,7 @@ export const rateLimits = {
     redis,
     limiter: Ratelimit.slidingWindow(50, "1 m"),
     analytics: true,
-    prefix: "taxi-project:@upstash/ratelimit/trips",
+    prefix: "taxi-project:@upstash/ratelimit/orders",
   }),
 
   // Auth (Register/Login): 5 requests per minute

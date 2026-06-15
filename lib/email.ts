@@ -459,7 +459,7 @@ export const buildAdminEmailHtml = (data: TripEmailData, companyName: string = '
               <!-- Admin CTA -->
               ${adminUrl ? `
               <div style="text-align:center;padding-top:8px;">
-                <a href="${adminUrl}/admin/trips" style="display:inline-block;background:#BF953F;color:#0f172a;font-weight:700;font-size:14px;padding:12px 28px;border-radius:8px;text-decoration:none;">
+                <a href="${adminUrl}/admin/orders" style="display:inline-block;background:#BF953F;color:#0f172a;font-weight:700;font-size:14px;padding:12px 28px;border-radius:8px;text-decoration:none;">
                   View in Admin Panel →
                 </a>
               </div>` : ''}

@@ -1,4 +1,4 @@
-import { getMyTrips } from "@/app/actions/trips";
+import { getMyTrips } from "@/app/actions/orders";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -9,7 +9,7 @@ export default async function MyTripsPage() {
   const session = await auth();
 
   if (!session?.user) {
-    redirect("/login?callbackUrl=/trips");
+    redirect("/login?callbackUrl=/orders");
   }
 
   const trips = await getMyTrips();
@@ -35,7 +35,7 @@ export default async function MyTripsPage() {
               const isCash = !trip.stripePaymentIntentId;
 
               return (
-                <Link href={`/trips/${trip.id}`} key={trip.id} className="block">
+                <Link href={`/orders/${trip.id}`} key={trip.id} className="block">
                   <div className="bg-white/5 border border-white/10 rounded-xl p-6 hover:border-taxi-gold-DEFAULT/50 transition-colors">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                       <div>

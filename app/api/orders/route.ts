@@ -248,7 +248,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         tripId: trip.id,
-        url: `${baseUrl}/trips/${trip.id}?success=true`
+        url: `${baseUrl}/orders/${trip.id}?success=true`
       });
     }
 
@@ -271,7 +271,7 @@ export async function POST(request: NextRequest) {
           },
         ],
         mode: "payment",
-        success_url: `${baseUrl}/trips/${trip.id}?success=true&session_id={CHECKOUT_SESSION_ID}`,
+        success_url: `${baseUrl}/orders/${trip.id}?success=true&session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${baseUrl}/booking?canceled=true`,
         metadata: {
           tripId: trip.id,
