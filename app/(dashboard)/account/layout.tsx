@@ -4,7 +4,7 @@ import Link from 'next/link'
 
 export default async function AccountLayout({ children }: { children: React.ReactNode }) {
   const session = await auth()
-  if (!session) redirect('/auth/login?callbackUrl=/account/orders')
+  if (!session) redirect('/login?callbackUrl=/account/orders')
 
   const navItems = [
     { href: '/account/orders',  label: '📋 My Orders' },

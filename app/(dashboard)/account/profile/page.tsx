@@ -5,13 +5,13 @@ import ProfileForm from '@/components/account/ProfileForm'
 
 export default async function AccountProfilePage() {
   const session = await auth()
-  if (!session?.user?.email) redirect('/auth/login')
+  if (!session?.user?.email) redirect('/login')
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
     select: { id: true, name: true, email: true, phone: true },
   })
-  if (!user) redirect('/auth/login')
+  if (!user) redirect('/login')
 
   return (
     <div>

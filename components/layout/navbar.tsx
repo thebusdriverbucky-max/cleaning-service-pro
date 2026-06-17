@@ -35,7 +35,7 @@ export default async function Navbar() {
               ) : null}
             </>
           ) : (
-            <Link href="/auth/login" className="text-sm font-medium text-slate-600 hover:text-slate-900 hidden md:block">
+            <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-slate-900 hidden md:block">
               Sign In
             </Link>
           )}

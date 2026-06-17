@@ -11,8 +11,8 @@ export default async function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-taxi-dark-navy py-12 px-4">
-      <Suspense fallback={<div className="text-center text-taxi-gold">Loading...</div>}>
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 py-12 px-4">
+      <Suspense fallback={<div className="text-center text-green-600">Loading...</div>}>
         <LoginContent />
       </Suspense>
     </div>

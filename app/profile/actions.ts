@@ -36,17 +36,17 @@ export async function updateProfile(data: {
       throw new Error("Current password is required to set a new password");
     }
 
-    if (!user.password) {
+    if (!user.passwordHash) {
       throw new Error("Cannot change password for OAuth users");
     }
 
-    const isValid = await bcrypt.compare(data.currentPassword, user.password);
+    const isValid = await bcrypt.compare(data.currentPassword, user.passwordHash);
     if (!isValid) {
       throw new Error("Invalid current password");
     }
 
     const hashedPassword = await bcrypt.hash(data.newPassword, 10);
-    updateData.password = hashedPassword;
+    updateData.passwordHash = hashedPassword;
   }
 
   await db.user.update({

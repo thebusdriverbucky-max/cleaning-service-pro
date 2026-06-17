@@ -60,18 +60,18 @@ export default function LoginContent() {
   };
 
   return (
-    <div className="w-full max-w-md bg-slate-900 border border-taxi-gold/20 rounded-2xl shadow-2xl p-8">
-      <h1 className="text-3xl font-bold mb-2 text-center text-taxi-gold">Welcome Back</h1>
-      <p className="text-gray-400 text-center mb-8">Sign in to your luxury experience</p>
+    <div className="w-full max-w-md bg-white border border-gray-200 rounded-2xl shadow-xl p-8">
+      <h1 className="text-3xl font-bold mb-2 text-center text-green-600">Welcome Back</h1>
+      <p className="text-gray-500 text-center mb-8">Sign in to your cleaning account</p>
 
       {registered && (
-        <div className="mb-6 p-4 bg-green-500/10 border border-green-500/20 text-green-400 rounded-xl text-sm flex items-center gap-2">
+        <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm flex items-center gap-2">
           <span className="text-lg">✓</span> Account created! Please sign in.
         </div>
       )}
 
       {error && (
-        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-sm">
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm">
           {error}
         </div>
       )}
@@ -84,7 +84,7 @@ export default function LoginContent() {
             {...register("email")}
             error={errors.email?.message}
             placeholder="you@example.com"
-            className="bg-taxi-dark-navy/50 border-taxi-gold/10 text-white placeholder:text-gray-600 focus:border-taxi-gold/50"
+            className="bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-green-500 rounded-xl"
           />
         </div>
 
@@ -95,12 +95,12 @@ export default function LoginContent() {
             {...register("password")}
             error={errors.password?.message}
             placeholder="••••••••"
-            className="bg-taxi-dark-navy/50 border-taxi-gold/10 text-white placeholder:text-gray-600 focus:border-taxi-gold/50"
+            className="bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-green-500 rounded-xl"
           />
           <div className="flex justify-end">
             <Link
               href="/forgot-password"
-              className="text-xs text-taxi-gold/70 hover:text-taxi-gold transition-colors"
+              className="text-xs text-green-600 hover:text-green-700 transition-colors"
             >
               Forgot password?
             </Link>
@@ -109,7 +109,7 @@ export default function LoginContent() {
 
         <Button
           type="submit"
-          className="w-full py-6 bg-taxi-gold-gradient text-taxi-dark-navy font-bold hover:opacity-90 transition-all shadow-lg shadow-taxi-gold/10"
+          className="w-full py-6 bg-green-600 hover:bg-green-700 text-white font-bold hover:opacity-90 transition-all shadow-lg shadow-green-600/10 rounded-xl"
           disabled={loading}
         >
           {loading ? "Signing in..." : "Sign In"}
@@ -117,9 +117,9 @@ export default function LoginContent() {
       </form>
 
       <div className="mt-8 text-center">
-        <p className="text-gray-400 text-sm">
+        <p className="text-gray-500 text-sm">
           Don't have an account?{" "}
-          <Link href="/register" className="text-taxi-gold hover:text-taxi-gold-light font-semibold transition-colors">
+          <Link href="/register" className="text-green-600 hover:text-green-700 font-semibold transition-colors">
             Create one
           </Link>
         </p>
@@ -127,10 +127,10 @@ export default function LoginContent() {
 
       <div className="mt-8 relative">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-taxi-gold/10"></div>
+          <div className="w-full border-t border-gray-200"></div>
         </div>
         <div className="relative flex justify-center text-xs uppercase tracking-widest">
-          <span className="px-4 bg-slate-900 text-gray-500">
+          <span className="px-4 bg-white text-gray-400">
             Or continue with
           </span>
         </div>
@@ -140,10 +140,10 @@ export default function LoginContent() {
         <Button
           type="button"
           variant="outline"
-          className="w-full py-6 gap-3 border-taxi-gold/30 bg-taxi-dark-navy text-white hover:bg-taxi-gold/10 hover:border-taxi-gold/50 transition-all shadow-inner"
+          className="w-full py-6 gap-3 border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-all rounded-xl shadow-sm"
           onClick={() => handleOAuthSignIn("google")}
         >
-          <Chrome className="w-5 h-5 text-taxi-gold" />
+          <Chrome className="w-5 h-5 text-gray-600" />
           Google
         </Button>
       </div>

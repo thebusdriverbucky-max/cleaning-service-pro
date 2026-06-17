@@ -13,12 +13,12 @@ const statusColors: Record<string, string> = {
 
 export default async function AccountOrdersPage() {
   const session = await auth()
-  if (!session?.user?.email) redirect('/auth/login')
+  if (!session?.user?.email) redirect('/login')
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
   })
-  if (!user) redirect('/auth/login')
+  if (!user) redirect('/login')
 
   const orders = await prisma.cleaningOrder.findMany({
     where: { userId: user.id },

@@ -17,21 +17,19 @@ module.exports = {
     },
     extend: {
       colors: {
-        "taxi-navy": "#1e3a8a",
-        "taxi-dark-navy": "#0f172a",
+        "taxi-navy": "#16a34a",
+        "taxi-dark-navy": "#ffffff",
         "taxi-gold": {
-          light: "#FDE68A", // Amber 200 - Highlights
-          DEFAULT: "#F59E0B", // Amber 500 - Main Text/Icons (Vibrant)
-          dark: "#B45309", // Amber 700 - Shadows/Borders
+          light: "#86efac", // Green 300
+          DEFAULT: "#16a34a", // Green 600
+          dark: "#15803d", // Green 700
         },
         "taxi-white": "#ffffff",
       },
       backgroundImage: {
-        // Simple Gold Gradient
-        "taxi-gold-gradient": "linear-gradient(to right, #FCF6BA, #BF953F)",
-        "taxi-gold-gradient-left": "linear-gradient(to left, #FCF6BA, #BF953F)",
-        // Subtle Luxury Pattern (for dark backgrounds)
-        "luxury-pattern": "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23F59E0B' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")",
+        "taxi-gold-gradient": "linear-gradient(to right, #4ade80, #16a34a)",
+        "taxi-gold-gradient-left": "linear-gradient(to left, #4ade80, #16a34a)",
+        "luxury-pattern": "none",
       },
       keyframes: {
         shimmer: {
