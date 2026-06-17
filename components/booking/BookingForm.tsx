@@ -11,6 +11,7 @@ type ServiceType = {
   basePrice: number
   pricePerSqm: number | null
   durationHours: number
+  minArea?: number | null
 }
 
 type Props = {
@@ -47,10 +48,9 @@ export default function BookingForm({ services, defaultService }: Props) {
   const calcPrice = () => {
     if (!selectedService) return 0
     if (selectedService.pricePerSqm && form.areaSize) {
-      return Math.max(
-        selectedService.basePrice,
-        parseFloat(form.areaSize) * selectedService.pricePerSqm
-      )
+      const minArea = selectedService.minArea || 0
+      const area = Math.max(parseFloat(form.areaSize), minArea)
+      return parseFloat((selectedService.pricePerSqm * area).toFixed(2))
     }
     return selectedService.basePrice
   }
@@ -149,17 +149,33 @@ export default function BookingForm({ services, defaultService }: Props) {
           <div className="space-y-4">
             <h2 className="font-semibold text-slate-900 text-lg mb-4">Booking Details</h2>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Area (m²)</label>
-                <input
-                  type="number"
-                  placeholder="e.g. 75"
-                  value={form.areaSize}
-                  onChange={e => update('areaSize', e.target.value)}
-                  className="w-full bg-white text-slate-900 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                />
+            {selectedService?.pricePerSqm ? (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Area (m²)</label>
+                  <input
+                    type="number"
+                    min={selectedService.minArea || 20}
+                    placeholder="e.g. 75"
+                    value={form.areaSize}
+                    onChange={e => update('areaSize', e.target.value)}
+                    className="w-full bg-white text-slate-900 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+                {selectedService?.slug !== 'window' && (
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Rooms</label>
+                    <input
+                      type="number"
+                      placeholder="e.g. 3"
+                      value={form.roomCount}
+                      onChange={e => update('roomCount', e.target.value)}
+                      className="w-full bg-white text-slate-900 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                )}
               </div>
+            ) : selectedService?.slug !== 'window' ? (
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Rooms</label>
                 <input
@@ -170,7 +186,7 @@ export default function BookingForm({ services, defaultService }: Props) {
                   className="w-full bg-white text-slate-900 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
-            </div>
+            ) : null}
 
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -304,13 +320,19 @@ export default function BookingForm({ services, defaultService }: Props) {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Phone</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Phone number <span className="text-red-500">*</span>
+              </label>
               <input
                 type="tel"
+                name="phone"
+                required
+                placeholder="+1 (555) 000-0000"
                 value={form.phone}
                 onChange={e => update('phone', e.target.value)}
                 className="w-full bg-white text-slate-900 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
+              <p className="text-xs text-slate-400 mt-1">We'll use this to confirm your appointment</p>
             </div>
 
             {/* Payment method toggle */}
@@ -366,7 +388,7 @@ export default function BookingForm({ services, defaultService }: Props) {
               </button>
               <button
                 onClick={handleSubmit}
-                disabled={loading || !form.name || !form.email}
+                disabled={loading || !form.name || !form.email || !form.phone}
                 className="flex-1 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-300 text-white font-semibold py-3 rounded-xl transition-colors"
               >
                 {loading ? 'Processing...' : form.paymentMethod === 'STRIPE' ? 'Pay Now →' : 'Confirm Booking →'}

@@ -26,6 +26,18 @@ export async function assignCleanerToOrder(orderId: string, cleanerId: string | 
   revalidatePath('/admin/orders')
 }
 
+export async function assignCleaner(orderId: string, formData: FormData) {
+  'use server'
+  const cleanerId = formData.get('cleanerId') as string
+  if (!cleanerId) return
+  await prisma.cleaningOrder.update({
+    where: { id: orderId },
+    data: { cleanerId },
+  })
+  revalidatePath(`/admin/orders/${orderId}`)
+  revalidatePath('/admin/orders')
+}
+
 // ---- CLEANERS ----
 
 export async function createCleaner(data: {
@@ -142,16 +154,19 @@ export async function togglePromoCode(id: string, isActive: boolean) {
 // ---- SITE SETTINGS ----
 
 export async function updateSetting(key: string, value: string) {
+  const { invalidateSettingsCache } = await import('@/lib/settings')
   await prisma.siteSettings.upsert({
     where: { key },
     update: { value },
     create: { key, value },
   })
+  invalidateSettingsCache()
   revalidatePath('/')
   revalidatePath('/admin/settings')
 }
 
 export async function bulkUpdateSettings(settings: Record<string, string>) {
+  const { invalidateSettingsCache } = await import('@/lib/settings')
   await Promise.all(
     Object.entries(settings).map(([key, value]) =>
       prisma.siteSettings.upsert({
@@ -161,6 +176,7 @@ export async function bulkUpdateSettings(settings: Record<string, string>) {
       })
     )
   )
+  invalidateSettingsCache()
   revalidatePath('/')
   revalidatePath('/admin/settings')
 }

@@ -47,6 +47,13 @@ export async function POST(req: NextRequest) {
       },
     })
 
+    if (phone && user.id) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { phone },
+      })
+    }
+
     if (paymentMethod === 'CASH') {
       // Send confirmation email for cash orders
       try {
