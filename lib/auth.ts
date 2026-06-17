@@ -41,11 +41,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           where: { email: validatedCreds.data.email },
         });
 
-        if (!user || !user.password) return null;
+        if (!user || !user.passwordHash) return null;
 
         const passwordMatch = await bcrypt.compare(
           credentials.password as string,
-          user.password
+          user.passwordHash
         );
 
         if (!passwordMatch) return null;
@@ -54,7 +54,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           id: user.id,
           email: user.email,
           name: user.name,
-          image: user.image,
           role: user.role,
         };
       },
