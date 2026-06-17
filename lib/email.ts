@@ -48,3 +48,17 @@ export async function sendEmail({ to, subject, html, from }: EmailPayload) {
   console.log('Subject:', subject)
   console.log('Body preview:', html.replace(/<[^>]+>/g, '').slice(0, 200))
 }
+
+export async function sendPasswordResetEmail(email: string, token: string) {
+  const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${token}`
+  await sendEmail({
+    to: email,
+    subject: '🔒 Reset your CleanFlow password',
+    html: `
+      <h1>Password Reset Request</h1>
+      <p>Click the link below to reset your password. This link will expire in 1 hour.</p>
+      <a href="${resetUrl}">${resetUrl}</a>
+      <p>If you didn't request this, you can safely ignore this email.</p>
+    `,
+  })
+}

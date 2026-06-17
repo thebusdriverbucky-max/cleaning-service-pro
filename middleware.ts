@@ -1,9 +1,71 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
+import { verifyLicenseToken, fetchLicenseValidation, LICENSE_COOKIE_NAME } from '@/lib/license'
 
-const PUBLIC_PATHS = ['/', '/services', '/booking', '/auth', '/api/auth', '/api/booking', '/api/webhooks', '/_next', '/favicon', '/robots', '/sitemap']
 const ADMIN_PATHS = ['/admin']
-const LICENSE_BYPASS_PATHS = ['/license-required', '/api/auth', '/_next', '/favicon']
+const LICENSE_SKIP_PATHS = [
+  '/license-required',
+  '/api/auth',
+  '/api/webhooks',
+  '/_next',
+  '/favicon',
+  '/robots',
+  '/sitemap',
+]
+
+async function licenseMiddleware(request: NextRequest): Promise<NextResponse | null> {
+  const pathname = request.nextUrl.pathname
+
+  // Skip check for system paths
+  if (LICENSE_SKIP_PATHS.some(p => pathname.startsWith(p))) {
+    return null
+  }
+
+  // Check existing JWT cookie
+  const cookieToken = request.cookies.get(LICENSE_COOKIE_NAME)?.value
+  if (cookieToken && cookieToken !== 'grace') {
+    const isValid = await verifyLicenseToken(cookieToken)
+    if (isValid) return null // Valid JWT — allow through
+  }
+
+  // Cookie missing or expired — fetch from license server
+  const { valid, token, grace } = await fetchLicenseValidation()
+
+  if (!valid) {
+    // Only block non-API routes to avoid breaking webhooks or API requests
+    if (pathname.startsWith('/api/')) {
+      return null
+    }
+    const url = request.nextUrl.clone()
+    url.pathname = '/license-required'
+    return NextResponse.redirect(url)
+  }
+
+  // Valid — set/refresh cookie and continue
+  const response = NextResponse.next()
+
+  if (token) {
+    // Full JWT from server — valid 24h
+    response.cookies.set(LICENSE_COOKIE_NAME, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 48, // 48h (grace period if server goes down)
+      path: '/',
+    })
+  } else if (grace) {
+    // Server unreachable — short grace cookie
+    response.cookies.set(LICENSE_COOKIE_NAME, 'grace', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 6, // 6h grace
+      path: '/',
+    })
+  }
+
+  return response
+}
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
@@ -11,19 +73,27 @@ export async function middleware(req: NextRequest) {
   // ══════════════════════════════════
   // 1. LICENSE CHECK (первый приоритет)
   // ══════════════════════════════════
-  const isBypassPath = LICENSE_BYPASS_PATHS.some(p => pathname.startsWith(p))
+  const licenseResponse = await licenseMiddleware(req)
 
-  if (!isBypassPath) {
-    const licenseKey = process.env.LICENSE_KEY || ''
-    const isDev = process.env.NODE_ENV === 'development'
-    const isLicensed = isDev || (licenseKey && isValidLicenseFormat(licenseKey))
+  // If it's a redirect (e.g. to /license-required), return it immediately
+  if (licenseResponse && licenseResponse.status !== 200) {
+    return licenseResponse
+  }
 
-    if (!isLicensed) {
-      // Only block non-API routes to avoid breaking webhooks
-      if (!pathname.startsWith('/api/')) {
-        return NextResponse.redirect(new URL('/license-required', req.url))
-      }
+  // Helper function to merge license cookies into a redirect response if needed
+  const withLicenseCookies = (res: NextResponse) => {
+    if (licenseResponse) {
+      licenseResponse.cookies.getAll().forEach(cookie => {
+        res.cookies.set(cookie.name, cookie.value, {
+          httpOnly: cookie.httpOnly,
+          secure: cookie.secure,
+          sameSite: cookie.sameSite,
+          maxAge: cookie.maxAge,
+          path: cookie.path,
+        })
+      })
     }
+    return res
   }
 
   // ══════════════════════════════════
@@ -35,11 +105,13 @@ export async function middleware(req: NextRequest) {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET } as any)
 
     if (!token) {
-      return NextResponse.redirect(new URL(`/login?callbackUrl=${pathname}`, req.url))
+      const redirectRes = NextResponse.redirect(new URL(`/login?callbackUrl=${pathname}`, req.url))
+      return withLicenseCookies(redirectRes)
     }
 
     if ((token as any).role !== 'ADMIN') {
-      return NextResponse.redirect(new URL('/', req.url))
+      const redirectRes = NextResponse.redirect(new URL('/', req.url))
+      return withLicenseCookies(redirectRes)
     }
   }
 
@@ -49,16 +121,12 @@ export async function middleware(req: NextRequest) {
   if (pathname.startsWith('/account')) {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET } as any)
     if (!token) {
-      return NextResponse.redirect(new URL(`/login?callbackUrl=${pathname}`, req.url))
+      const redirectRes = NextResponse.redirect(new URL(`/login?callbackUrl=${pathname}`, req.url))
+      return withLicenseCookies(redirectRes)
     }
   }
 
-  return NextResponse.next()
-}
-
-function isValidLicenseFormat(key: string): boolean {
-  if (key.startsWith('DEV-')) return true
-  return /^CLEAN-[A-F0-9]{8}-[A-F0-9]{8}-[A-F0-9]{8}$/.test(key)
+  return licenseResponse || NextResponse.next()
 }
 
 export const config = {

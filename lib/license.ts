@@ -2,7 +2,7 @@ import { jwtVerify } from 'jose';
 
 const LICENSE_SERVER_URL = process.env.LICENSE_SERVER_URL || '';
 const LICENSE_KEY = process.env.LICENSE_KEY || '';
-export const LICENSE_PRODUCT = process.env.LICENSE_PRODUCT || 'neo-taxi';
+export const LICENSE_PRODUCT = process.env.LICENSE_PRODUCT || 'neo-cleaning';
 
 export const LICENSE_COOKIE_NAME = 'neo_license';
 
