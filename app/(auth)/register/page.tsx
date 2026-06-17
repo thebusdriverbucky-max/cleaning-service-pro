@@ -71,8 +71,8 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 py-12 px-4">
-      <div className="w-full max-w-md bg-white border border-gray-200 rounded-2xl shadow-xl p-8">
-        <h1 className="text-3xl font-bold mb-2 text-center text-green-600">Create Account</h1>
+      <div className="w-full max-w-md bg-[#fdfbf7] border border-gray-200 rounded-2xl shadow-xl p-8">
+        <h1 className="text-3xl font-bold mb-2 text-center text-emerald-600">Create Account</h1>
         <p className="text-gray-500 text-center mb-8">Join our professional cleaning service</p>
 
         {error && (
@@ -87,7 +87,7 @@ export default function RegisterPage() {
             {...register("name")}
             error={errors.name?.message}
             placeholder="John Doe"
-            className="bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-green-500 rounded-xl"
+            className="bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-emerald-500 rounded-xl"
           />
 
           <Input
@@ -96,7 +96,7 @@ export default function RegisterPage() {
             {...register("email")}
             error={errors.email?.message}
             placeholder="you@example.com"
-            className="bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-green-500 rounded-xl"
+            className="bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-emerald-500 rounded-xl"
           />
 
           <Input
@@ -106,7 +106,7 @@ export default function RegisterPage() {
             error={errors.password?.message}
             placeholder="••••••••"
             helperText="At least 8 characters"
-            className="bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-green-500 rounded-xl"
+            className="bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-emerald-500 rounded-xl"
           />
 
           <Input
@@ -115,12 +115,12 @@ export default function RegisterPage() {
             {...register("confirmPassword")}
             error={errors.confirmPassword?.message}
             placeholder="••••••••"
-            className="bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-green-500 rounded-xl"
+            className="bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-emerald-500 rounded-xl"
           />
 
           <Button
             type="submit"
-            className="w-full py-6 bg-green-600 hover:bg-green-700 text-white font-bold hover:opacity-90 transition-all shadow-lg shadow-green-600/10 rounded-xl"
+            className="w-full py-6 bg-emerald-500 hover:bg-emerald-600 text-white font-bold hover:opacity-90 transition-all shadow-lg shadow-emerald-500/10 rounded-xl"
             disabled={loading}
           >
             {loading ? "Creating account..." : "Create Account"}
@@ -130,7 +130,7 @@ export default function RegisterPage() {
         <div className="mt-8 text-center">
           <p className="text-gray-500 text-sm">
             Already have an account?{" "}
-            <Link href="/login" className="text-green-600 hover:text-green-700 font-semibold transition-colors">
+            <Link href="/login" className="text-emerald-600 hover:text-emerald-700 font-semibold transition-colors">
               Sign In
             </Link>
           </p>

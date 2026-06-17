@@ -76,9 +76,9 @@ function ResetPasswordContent() {
 
   if (!token) {
     return (
-      <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-lg shadow-md p-8 text-center">
+      <div className="w-full max-w-md bg-[#fdfbf7] border border-gray-200 rounded-2xl shadow-xl p-8 text-center">
         <h1 className="text-2xl font-bold mb-4 text-red-600">Invalid Request</h1>
-        <p className="text-gray-600 dark:text-gray-400 mb-6">
+        <p className="text-gray-600 mb-6">
           Missing reset token. Please check the link you received.
         </p>
         <Link href="/login" className="text-blue-600 hover:underline font-medium">
@@ -89,11 +89,11 @@ function ResetPasswordContent() {
   }
 
   return (
-    <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-lg shadow-md p-8">
+    <div className="w-full max-w-md bg-[#fdfbf7] border border-gray-200 rounded-2xl shadow-xl p-8">
       <h1 className="text-3xl font-bold mb-6 text-center">Reset Password</h1>
 
       {message && (
-        <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-lg text-sm">
+        <div className="mb-4 p-3 bg-emerald-50 text-emerald-700 rounded-lg text-sm">
           {message}
         </div>
       )}

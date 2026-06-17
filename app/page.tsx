@@ -9,27 +9,34 @@ export default async function HomePage() {
   return (
     <main>
       {/* HERO */}
-      <section className="relative bg-gradient-to-br from-slate-900 to-slate-800 text-white py-24 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <span className="inline-block bg-emerald-500/20 text-emerald-400 text-sm font-medium px-4 py-1.5 rounded-full mb-6 border border-emerald-500/30">
+      <section className="relative bg-gradient-to-br from-emerald-50 via-teal-50/20 to-white text-slate-900 py-24 px-4 overflow-hidden border-b border-slate-100">
+        {/* Floating Decorative Elements */}
+        <div className="absolute top-12 left-10 text-6xl opacity-15 select-none pointer-events-none animate-bounce" style={{ animationDuration: '4s' }}>🫧</div>
+        <div className="absolute bottom-16 left-1/4 text-5xl opacity-10 select-none pointer-events-none animate-pulse">✨</div>
+        <div className="absolute top-20 right-16 text-7xl opacity-15 select-none pointer-events-none animate-bounce" style={{ animationDuration: '6s' }}>🧹</div>
+        <div className="absolute bottom-12 right-1/4 text-6xl opacity-10 select-none pointer-events-none animate-pulse">🧽</div>
+        <div className="absolute top-1/2 left-8 text-5xl opacity-10 select-none pointer-events-none animate-pulse">💧</div>
+
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <span className="inline-block bg-emerald-100 text-emerald-800 text-sm font-medium px-4 py-1.5 rounded-full mb-6 border border-emerald-200">
             Trusted by 1,000+ customers
           </span>
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+          <h1 className="text-4xl md:text-6xl font-extrabold mb-6 leading-tight text-slate-900">
             {settings.hero_title || 'Professional Cleaning, Done Right'}
           </h1>
-          <p className="text-xl text-slate-300 mb-10 max-w-2xl mx-auto">
+          <p className="text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed">
             {settings.hero_subtitle || 'Book a trusted cleaning team in minutes. Online payment or cash on site.'}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/booking"
-              className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-8 py-4 rounded-xl text-lg transition-colors"
+              className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-8 py-4 rounded-xl text-lg transition-all hover:shadow-lg hover:shadow-emerald-500/20 shadow-md duration-200"
             >
               Book Now
             </Link>
             <Link
               href="/services"
-              className="bg-white/10 hover:bg-white/20 text-white font-semibold px-8 py-4 rounded-xl text-lg transition-colors border border-white/20"
+              className="bg-white hover:bg-slate-50 text-slate-700 font-bold px-8 py-4 rounded-xl text-lg transition-all border border-slate-200 shadow-sm duration-200"
             >
               See Services
             </Link>

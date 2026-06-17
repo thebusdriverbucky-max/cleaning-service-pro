@@ -12,9 +12,13 @@ export default async function ServicesPage() {
 
   return (
     <main className="min-h-screen bg-white">
-      <section className="bg-slate-900 text-white py-16 px-4 text-center">
-        <h1 className="text-4xl font-bold mb-4">Cleaning Services</h1>
-        <p className="text-slate-300 text-lg max-w-xl mx-auto">
+      <section className="relative bg-gradient-to-br from-emerald-50 via-teal-50/20 to-white text-slate-900 py-16 px-4 text-center border-b border-slate-100 overflow-hidden">
+        {/* Floating Decorative Elements */}
+        <div className="absolute top-6 left-12 text-4xl opacity-15 select-none pointer-events-none animate-bounce" style={{ animationDuration: '5s' }}>🫧</div>
+        <div className="absolute bottom-6 right-16 text-4xl opacity-15 select-none pointer-events-none animate-pulse">✨</div>
+        
+        <h1 className="text-4xl font-extrabold text-slate-900 mb-4 relative z-10">Cleaning Services</h1>
+        <p className="text-slate-600 text-lg max-w-xl mx-auto relative z-10 leading-relaxed">
           Professional, reliable, and eco-friendly cleaning for every need.
         </p>
       </section>

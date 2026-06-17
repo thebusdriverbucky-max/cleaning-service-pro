@@ -72,8 +72,8 @@ export default async function RootLayout({
       <body className={inter.className}>
         <SessionProvider>
           <SettingsProvider initialSettings={settings as unknown as StoreSettingsData}>
-            <ThemeProvider attribute="class" defaultTheme="dark" forcedTheme="dark" enableSystem={false}>
-              <div className="flex flex-col min-h-screen bg-slate-950 text-white">
+            <ThemeProvider attribute="class" defaultTheme="light" forcedTheme="light" enableSystem={false}>
+              <div className="flex flex-col min-h-screen bg-white text-slate-900">
                 <TopContactBar />
                 <Navbar />
                 <main className="flex-1">{children}</main>

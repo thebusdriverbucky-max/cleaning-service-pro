@@ -55,15 +55,15 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 py-12 px-4">
-      <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-lg shadow-md p-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
+      <div className="w-full max-w-md bg-[#fdfbf7] border border-gray-200 rounded-2xl shadow-xl p-8">
         <h1 className="text-3xl font-bold mb-6 text-center">Forgot Password</h1>
-        <p className="text-center text-gray-600 dark:text-gray-400 mb-6">
+        <p className="text-center text-gray-600 mb-6">
           Enter your email address and we'll send you a link to reset your password.
         </p>
 
         {message && (
-          <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-lg text-sm">
+          <div className="mb-4 p-3 bg-emerald-50 text-emerald-700 rounded-lg text-sm">
             {message}
           </div>
         )}

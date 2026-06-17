@@ -34,7 +34,7 @@ export function TopContactBar() {
         }`}
     >
       <div className="overflow-hidden">
-        <div className="bg-green-600 py-2 text-white">
+        <div className="bg-emerald-600 py-2 text-white">
           <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-2 md:gap-4">
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-3">

@@ -60,12 +60,12 @@ export default function LoginContent() {
   };
 
   return (
-    <div className="w-full max-w-md bg-white border border-gray-200 rounded-2xl shadow-xl p-8">
-      <h1 className="text-3xl font-bold mb-2 text-center text-green-600">Welcome Back</h1>
+    <div className="w-full max-w-md bg-[#fdfbf7] border border-gray-200 rounded-2xl shadow-xl p-8">
+      <h1 className="text-3xl font-bold mb-2 text-center text-emerald-600">Welcome Back</h1>
       <p className="text-gray-500 text-center mb-8">Sign in to your cleaning account</p>
 
       {registered && (
-        <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm flex items-center gap-2">
+        <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl text-sm flex items-center gap-2">
           <span className="text-lg">✓</span> Account created! Please sign in.
         </div>
       )}
@@ -84,7 +84,7 @@ export default function LoginContent() {
             {...register("email")}
             error={errors.email?.message}
             placeholder="you@example.com"
-            className="bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-green-500 rounded-xl"
+            className="bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-emerald-500 rounded-xl"
           />
         </div>
 
@@ -95,12 +95,12 @@ export default function LoginContent() {
             {...register("password")}
             error={errors.password?.message}
             placeholder="••••••••"
-            className="bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-green-500 rounded-xl"
+            className="bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-emerald-500 rounded-xl"
           />
           <div className="flex justify-end">
             <Link
               href="/forgot-password"
-              className="text-xs text-green-600 hover:text-green-700 transition-colors"
+              className="text-xs text-emerald-600 hover:text-emerald-700 transition-colors"
             >
               Forgot password?
             </Link>
@@ -109,7 +109,7 @@ export default function LoginContent() {
 
         <Button
           type="submit"
-          className="w-full py-6 bg-green-600 hover:bg-green-700 text-white font-bold hover:opacity-90 transition-all shadow-lg shadow-green-600/10 rounded-xl"
+          className="w-full py-6 bg-emerald-500 hover:bg-emerald-600 text-white font-bold hover:opacity-90 transition-all shadow-lg shadow-emerald-500/10 rounded-xl"
           disabled={loading}
         >
           {loading ? "Signing in..." : "Sign In"}
@@ -119,7 +119,7 @@ export default function LoginContent() {
       <div className="mt-8 text-center">
         <p className="text-gray-500 text-sm">
           Don't have an account?{" "}
-          <Link href="/register" className="text-green-600 hover:text-green-700 font-semibold transition-colors">
+          <Link href="/register" className="text-emerald-600 hover:text-emerald-700 font-semibold transition-colors">
             Create one
           </Link>
         </p>

@@ -25,18 +25,18 @@ export function CookieBanner() {
   if (!showBanner) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md text-gray-900 p-4 z-50 border-t border-green-200 shadow-[0_-4px_30px_rgba(0,0,0,0.05)]">
+    <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md text-gray-900 p-4 z-50 border-t border-emerald-200 shadow-[0_-4px_30px_rgba(0,0,0,0.05)]">
       <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex-1">
           <p className="text-sm mb-1 font-semibold text-gray-900">🍪 This site uses cookies</p>
           <p className="text-xs text-gray-600">
             We use <strong className="text-gray-800">essential cookies</strong> for authentication and booking functionality.
             Optional cookies help us analyze site usage. Read our{" "}
-            <a href="/privacy" className="text-green-600 hover:underline font-semibold">
+            <a href="/privacy" className="text-emerald-600 hover:underline font-semibold">
               Privacy Policy
             </a>{" "}
             and{" "}
-            <a href="/cookies" className="text-green-600 hover:underline font-semibold">
+            <a href="/cookies" className="text-emerald-600 hover:underline font-semibold">
               Cookie Policy
             </a>.
           </p>
@@ -50,7 +50,7 @@ export function CookieBanner() {
           </button>
           <button
             onClick={handleAcceptAll}
-            className="px-5 py-2 text-sm font-bold rounded-lg whitespace-nowrap text-white bg-green-600 hover:bg-green-700 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-green-600/20"
+            className="px-5 py-2 text-sm font-bold rounded-lg whitespace-nowrap text-white bg-emerald-500 hover:bg-emerald-600 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-emerald-500/20"
           >
             Accept All
           </button>
