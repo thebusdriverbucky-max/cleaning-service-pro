@@ -26,7 +26,7 @@ export default async function ServicesPage() {
       <section className="py-16 px-4">
         <div className="max-w-5xl mx-auto space-y-6">
           {services.map(service => (
-            <div key={service.id} className="bg-white border border-slate-200 rounded-2xl p-8 flex flex-col md:flex-row md:items-center gap-6 hover:border-emerald-400 transition-colors">
+            <div key={service.id} className="bg-white border border-slate-300 rounded-2xl p-8 flex flex-col md:flex-row md:items-center gap-6 hover:border-emerald-400 transition-colors">
               <div className="text-6xl flex-shrink-0">{service.icon}</div>
               <div className="flex-1">
                 <h2 className="text-2xl font-bold text-slate-900 mb-2">{service.name}</h2>

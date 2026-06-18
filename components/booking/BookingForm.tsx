@@ -115,7 +115,7 @@ export default function BookingForm({ services, defaultService }: Props) {
                   key={service.slug}
                   className={`flex items-center gap-4 p-4 border rounded-xl cursor-pointer transition-colors ${form.serviceSlug === service.slug
                     ? 'border-emerald-500 bg-emerald-50'
-                    : 'border-slate-200 hover:border-slate-300'
+                    : 'border-slate-200 hover:border-slate-400'
                     }`}
                 >
                   <input
@@ -159,7 +159,7 @@ export default function BookingForm({ services, defaultService }: Props) {
                     placeholder="e.g. 75"
                     value={form.areaSize}
                     onChange={e => update('areaSize', e.target.value)}
-                    className="w-full bg-white text-slate-900 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full bg-transparent text-slate-900 border border-slate-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
                 {selectedService?.slug !== 'window' && (
@@ -170,7 +170,7 @@ export default function BookingForm({ services, defaultService }: Props) {
                       placeholder="e.g. 3"
                       value={form.roomCount}
                       onChange={e => update('roomCount', e.target.value)}
-                      className="w-full bg-white text-slate-900 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-full bg-transparent text-slate-900 border border-slate-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
                 )}
@@ -183,7 +183,7 @@ export default function BookingForm({ services, defaultService }: Props) {
                   placeholder="e.g. 3"
                   value={form.roomCount}
                   onChange={e => update('roomCount', e.target.value)}
-                  className="w-full bg-white text-slate-900 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full bg-transparent text-slate-900 border border-slate-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
             ) : null}
@@ -197,7 +197,7 @@ export default function BookingForm({ services, defaultService }: Props) {
                   min={new Date().toISOString().split('T')[0]}
                   value={form.scheduledDate}
                   onChange={e => update('scheduledDate', e.target.value)}
-                  className="w-full bg-white text-slate-900 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full bg-transparent text-slate-900 border border-slate-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
               <div>
@@ -205,7 +205,7 @@ export default function BookingForm({ services, defaultService }: Props) {
                 <select
                   value={form.scheduledTime}
                   onChange={e => update('scheduledTime', e.target.value)}
-                  className="w-full bg-white text-slate-900 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full bg-transparent text-slate-900 border border-slate-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 >
                   {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'].map(t => (
                     <option key={t} value={t}>{t}</option>
@@ -222,7 +222,7 @@ export default function BookingForm({ services, defaultService }: Props) {
                 placeholder="123 Main St, Apt 4B"
                 value={form.addressStreet}
                 onChange={e => update('addressStreet', e.target.value)}
-                className="w-full bg-white text-slate-900 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full bg-transparent text-slate-900 border border-slate-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
 
@@ -235,7 +235,7 @@ export default function BookingForm({ services, defaultService }: Props) {
                   placeholder="New York"
                   value={form.addressCity}
                   onChange={e => update('addressCity', e.target.value)}
-                  className="w-full bg-white text-slate-900 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full bg-transparent text-slate-900 border border-slate-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
               <div>
@@ -245,7 +245,7 @@ export default function BookingForm({ services, defaultService }: Props) {
                   placeholder="10001"
                   value={form.addressPostal}
                   onChange={e => update('addressPostal', e.target.value)}
-                  className="w-full bg-white text-slate-900 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full bg-transparent text-slate-900 border border-slate-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
             </div>
@@ -257,7 +257,7 @@ export default function BookingForm({ services, defaultService }: Props) {
                 placeholder="Doorbell code, key under mat, etc."
                 value={form.accessNotes}
                 onChange={e => update('accessNotes', e.target.value)}
-                className="w-full bg-white text-slate-900 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full bg-transparent text-slate-900 border border-slate-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
 
@@ -268,7 +268,7 @@ export default function BookingForm({ services, defaultService }: Props) {
                 placeholder="Any specific areas to focus on, pets, allergies..."
                 value={form.specialRequests}
                 onChange={e => update('specialRequests', e.target.value)}
-                className="w-full bg-white text-slate-900 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+                className="w-full bg-transparent text-slate-900 border border-slate-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
               />
             </div>
 
@@ -306,7 +306,7 @@ export default function BookingForm({ services, defaultService }: Props) {
                 required
                 value={form.name}
                 onChange={e => update('name', e.target.value)}
-                className="w-full bg-white text-slate-900 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full bg-transparent text-slate-900 border border-slate-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
             <div>
@@ -316,7 +316,7 @@ export default function BookingForm({ services, defaultService }: Props) {
                 required
                 value={form.email}
                 onChange={e => update('email', e.target.value)}
-                className="w-full bg-white text-slate-900 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full bg-transparent text-slate-900 border border-slate-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
             <div>
@@ -330,7 +330,7 @@ export default function BookingForm({ services, defaultService }: Props) {
                 placeholder="+1 (555) 000-0000"
                 value={form.phone}
                 onChange={e => update('phone', e.target.value)}
-                className="w-full bg-white text-slate-900 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full bg-transparent text-slate-900 border border-slate-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
               <p className="text-xs text-slate-400 mt-1">We'll use this to confirm your appointment</p>
             </div>
@@ -339,13 +339,13 @@ export default function BookingForm({ services, defaultService }: Props) {
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-3">Payment Method</label>
               <div className="grid grid-cols-2 gap-3">
-                <label className={`flex flex-col items-center gap-2 p-4 border-2 rounded-xl cursor-pointer transition-colors ${form.paymentMethod === 'STRIPE' ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 hover:border-slate-300'}`}>
+                <label className={`flex flex-col items-center gap-2 p-4 border-2 rounded-xl cursor-pointer transition-colors ${form.paymentMethod === 'STRIPE' ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 hover:border-slate-400'}`}>
                   <input type="radio" name="payment" value="STRIPE" checked={form.paymentMethod === 'STRIPE'} onChange={() => update('paymentMethod', 'STRIPE')} className="sr-only" />
                   <span className="text-2xl">💳</span>
                   <span className="font-medium text-sm text-slate-900">Pay Online</span>
                   <span className="text-xs text-slate-500">Stripe · Secure</span>
                 </label>
-                <label className={`flex flex-col items-center gap-2 p-4 border-2 rounded-xl cursor-pointer transition-colors ${form.paymentMethod === 'CASH' ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 hover:border-slate-300'}`}>
+                <label className={`flex flex-col items-center gap-2 p-4 border-2 rounded-xl cursor-pointer transition-colors ${form.paymentMethod === 'CASH' ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 hover:border-slate-400'}`}>
                   <input type="radio" name="payment" value="CASH" checked={form.paymentMethod === 'CASH'} onChange={() => update('paymentMethod', 'CASH')} className="sr-only" />
                   <span className="text-2xl">💵</span>
                   <span className="font-medium text-sm text-slate-900">Cash on Site</span>
@@ -355,7 +355,7 @@ export default function BookingForm({ services, defaultService }: Props) {
             </div>
 
             {/* Order summary */}
-            <div className="bg-slate-50 rounded-xl p-4 space-y-2 text-sm">
+            <div className="bg-emerald-50/50 rounded-xl p-4 space-y-2 text-sm">
               <div className="font-semibold text-slate-900 mb-3">Order Summary</div>
               <div className="flex justify-between text-slate-600">
                 <span>{selectedService?.name}</span>
