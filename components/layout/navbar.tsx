@@ -3,17 +3,24 @@ import { auth } from '@/lib/auth'
 import { getSetting } from '@/lib/settings'
 
 export default async function Navbar() {
-  const [session, siteName] = await Promise.all([
+  const [session, siteName, siteLogo] = await Promise.all([
     auth(),
     getSetting('site_name', 'CleanFlow'),
+    getSetting('site_logo', ''),
   ])
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 font-bold text-xl text-slate-900">
-          <span className="text-2xl">🫧</span>
-          {siteName}
+          {siteLogo ? (
+            <img src={siteLogo} alt={siteName} className="h-8 max-w-[150px] object-contain" />
+          ) : (
+            <>
+              <span className="text-2xl">🫧</span>
+              {siteName}
+            </>
+          )}
         </Link>
 
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">

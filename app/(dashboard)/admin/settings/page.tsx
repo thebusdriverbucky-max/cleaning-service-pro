@@ -1,6 +1,7 @@
 import { getSiteSettings } from '@/lib/settings'
 import { bulkUpdateSettings } from '@/app/actions/admin'
 import Link from 'next/link'
+import { ImageUploadSetting } from '@/components/admin/ImageUploadSetting'
 
 type Props = {
   searchParams: { tab?: string; subtab?: string }
@@ -18,6 +19,18 @@ export default async function AdminSettingsPage({ searchParams }: Props) {
     { key: 'site_address', label: 'Office Address', type: 'text' },
     { key: 'currency', label: 'Currency Code (e.g. USD)', type: 'text' },
     { key: 'currency_symbol', label: 'Currency Symbol (e.g. $)', type: 'text' },
+  ]
+
+  const brandingFields = [
+    { key: 'site_logo', label: 'Site Logo URL (Cloudinary/Imgur)', type: 'url' },
+    { key: 'site_favicon', label: 'Favicon URL (.ico or .png)', type: 'url' },
+  ]
+
+  const seoFields = [
+    { key: 'seo_title_suffix', label: 'SEO Title Suffix (e.g. | My Cleaning Service)', type: 'text' },
+    { key: 'seo_meta_description', label: 'Global Meta Description', type: 'textarea' },
+    { key: 'seo_meta_keywords', label: 'Meta Keywords (comma separated)', type: 'text' },
+    { key: 'seo_og_image', label: 'OG Image URL (Social Share Image)', type: 'url' },
   ]
 
   const pageGroups = {
@@ -130,7 +143,11 @@ export default async function AdminSettingsPage({ searchParams }: Props) {
   async function handleGeneralSave(formData: FormData) {
     'use server'
     const data: Record<string, string> = {}
-    const keys = ['site_name', 'site_phone', 'site_email', 'site_address', 'currency', 'currency_symbol']
+    const keys = [
+      'site_name', 'site_phone', 'site_email', 'site_address', 'currency', 'currency_symbol',
+      'site_logo', 'site_favicon',
+      'seo_title_suffix', 'seo_meta_description', 'seo_meta_keywords', 'seo_og_image'
+    ]
     for (const key of keys) {
       const val = formData.get(key)
       if (val !== null) data[key] = val as string
@@ -141,7 +158,7 @@ export default async function AdminSettingsPage({ searchParams }: Props) {
   async function handleContentSave(formData: FormData) {
     'use server'
     const data: Record<string, string> = {}
-    
+
     // Extract subtab from a hidden field to know which keys to process,
     // or just process all keys present in the form data.
     // It's safer to just iterate through all entries provided.
@@ -166,8 +183,8 @@ export default async function AdminSettingsPage({ searchParams }: Props) {
           <Link
             href="/admin/settings?tab=general"
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${currentTab === 'general'
-                ? 'bg-white text-slate-900 shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
+              ? 'bg-white text-slate-900 shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
               }`}
           >
             ⚙️ General Settings
@@ -175,8 +192,8 @@ export default async function AdminSettingsPage({ searchParams }: Props) {
           <Link
             href="/admin/settings?tab=content"
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${currentTab === 'content'
-                ? 'bg-white text-slate-900 shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
+              ? 'bg-white text-slate-900 shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
               }`}
           >
             📝 Page Content (CMS)
@@ -205,6 +222,63 @@ export default async function AdminSettingsPage({ searchParams }: Props) {
             </div>
           </div>
 
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-slate-900 mb-5 flex items-center gap-2">
+              🎨 Branding & Identity
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {brandingFields.map(field => (
+                <ImageUploadSetting
+                  key={field.key}
+                  name={field.key}
+                  label={field.label}
+                  defaultValue={settings[field.key] || ''}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-slate-900 mb-5 flex items-center gap-2">
+              🔍 Search Engine Optimization (SEO)
+            </h2>
+            <div className="space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {seoFields.filter(f => f.type !== 'textarea' && f.key !== 'seo_og_image').map(field => (
+                  <div key={field.key} className="space-y-1">
+                    <label className="block text-sm font-medium text-slate-700">{field.label}</label>
+                    <input
+                      name={field.key}
+                      type="text"
+                      defaultValue={settings[field.key] || ''}
+                      className="w-full bg-white text-slate-900 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-shadow"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {seoFields.filter(f => f.type === 'textarea').map(field => (
+                <div key={field.key} className="space-y-1">
+                  <label className="block text-sm font-medium text-slate-700">{field.label}</label>
+                  <textarea
+                    name={field.key}
+                    rows={3}
+                    defaultValue={settings[field.key] || ''}
+                    className="w-full bg-white text-slate-900 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-shadow"
+                  />
+                </div>
+              ))}
+
+              <div>
+                <ImageUploadSetting
+                  name="seo_og_image"
+                  label="OG Image URL (Social Share Image)"
+                  defaultValue={settings['seo_og_image'] || ''}
+                />
+              </div>
+            </div>
+          </div>
+
           <div className="flex justify-end">
             <button
               type="submit"
@@ -221,8 +295,8 @@ export default async function AdminSettingsPage({ searchParams }: Props) {
             <Link
               href="/admin/settings?tab=content&subtab=home"
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors border ${currentSubTab === 'home'
-                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                  : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900'
                 }`}
             >
               🏠 Home Page
@@ -230,8 +304,8 @@ export default async function AdminSettingsPage({ searchParams }: Props) {
             <Link
               href="/admin/settings?tab=content&subtab=about"
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors border ${currentSubTab === 'about'
-                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                  : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900'
                 }`}
             >
               ℹ️ About Us
@@ -239,8 +313,8 @@ export default async function AdminSettingsPage({ searchParams }: Props) {
             <Link
               href="/admin/settings?tab=content&subtab=legal"
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors border ${currentSubTab === 'legal'
-                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                  : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900'
                 }`}
             >
               ⚖️ Legal Pages
@@ -248,8 +322,8 @@ export default async function AdminSettingsPage({ searchParams }: Props) {
             <Link
               href="/admin/settings?tab=content&subtab=company"
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors border ${currentSubTab === 'company'
-                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                  : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900'
                 }`}
             >
               🏢 Company Info

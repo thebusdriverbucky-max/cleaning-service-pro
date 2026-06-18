@@ -83,6 +83,12 @@ async function main() {
     { key: 'hero_subtitle', value: 'Book a trusted cleaning team in minutes. Online payment or cash on site.', description: 'Homepage hero subtitle' },
     { key: 'currency', value: 'USD', description: 'Currency code' },
     { key: 'currency_symbol', value: '$', description: 'Currency symbol' },
+    { key: 'site_logo', value: '', description: 'Main website logo URL' },
+    { key: 'site_favicon', value: '/favicon.ico', description: 'Website favicon URL' },
+    { key: 'seo_title_suffix', value: ' | CleanFlow', description: 'Suffix added to page titles' },
+    { key: 'seo_meta_description', value: 'Professional cleaning services. Book a trusted cleaning team in minutes. Residential, commercial, and deep cleaning.', description: 'Default meta description' },
+    { key: 'seo_meta_keywords', value: 'cleaning service, house cleaning, commercial cleaning, professional cleaners', description: 'Default meta keywords' },
+    { key: 'seo_og_image', value: '', description: 'Social share image URL' },
   ]
 
   for (const setting of settings) {

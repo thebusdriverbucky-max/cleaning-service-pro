@@ -9,7 +9,13 @@ export default async function Footer() {
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
         <div>
           <div className="flex items-center gap-2 font-bold text-slate-900 text-lg mb-3">
-            <span>🫧</span> {settings.site_name || 'CleanFlow'}
+            {settings.site_logo ? (
+              <img src={settings.site_logo} alt={settings.site_name || 'CleanFlow'} className="h-8 max-w-[150px] object-contain" />
+            ) : (
+              <>
+                <span>🫧</span> {settings.site_name || 'CleanFlow'}
+              </>
+            )}
           </div>
           <p className="text-sm leading-relaxed text-slate-500">
             Professional cleaning services. Book online, pay your way.

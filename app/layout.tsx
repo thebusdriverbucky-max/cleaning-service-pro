@@ -12,45 +12,44 @@ import { CookieBanner } from "@/components/layout/CookieBanner";
 import { WhatsAppButton } from "@/components/layout/WhatsAppButton";
 import { TopContactBar } from "@/components/top-contact-bar";
 import { Analytics } from "@vercel/analytics/react";
-import { db as prisma } from "@/lib/db";
+import { getSiteSettings } from "@/lib/settings";
 import { SettingsProvider } from "@/components/providers/settings-provider";
 import { StoreSettingsData } from "@/app/actions/settings";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export async function generateMetadata(): Promise<Metadata> {
-  let settings = null;
-  try {
-    // В новой схеме модель называется SiteSettings, но пока в базе может быть старая таблица
-    // Если миграции еще не запущены, этот код может упасть, но мы работаем над трансформацией
-    settings = await (prisma as any).siteSettings.findFirst();
-  } catch (error) {
-    // Fallback if table doesn't exist yet
-  }
+  const settings = await getSiteSettings();
 
-  const siteName = settings?.value || "CleanFlow — Professional Cleaning Service";
-  const siteDescription = "Book professional cleaning services online. Residential, commercial, deep cleaning and more. Online payment or cash on site.";
+  const siteName = settings.site_name || "CleanFlow — Professional Cleaning Service";
+  const siteDescription = settings.seo_meta_description || "Book professional cleaning services online. Residential, commercial, deep cleaning and more. Online payment or cash on site.";
+  const titleSuffix = settings.seo_title_suffix || " | CleanFlow";
+  const ogImage = settings.seo_og_image || "/og-image.png";
+  const favicon = settings.site_favicon || "/favicon.ico";
+  const keywords = settings.seo_meta_keywords ? settings.seo_meta_keywords.split(',').map(k => k.trim()) : ["cleaning service", "house cleaning", "commercial cleaning", "book cleaning", "professional cleaners"];
 
   return {
     title: {
       default: siteName,
-      template: `%s | CleanFlow`,
+      template: `%s${titleSuffix}`,
     },
     description: siteDescription,
-    keywords: ["cleaning service", "house cleaning", "commercial cleaning", "book cleaning", "professional cleaners"],
+    keywords: keywords,
     icons: {
-      icon: "/favicon.ico",
+      icon: favicon,
     },
     openGraph: {
       type: "website",
       locale: "en_US",
       title: siteName,
       description: siteDescription,
+      images: ogImage ? [{ url: ogImage }] : [],
     },
     twitter: {
       card: "summary_large_image",
       title: siteName,
       description: siteDescription,
+      images: ogImage ? [ogImage] : [],
     },
   };
 }
@@ -60,12 +59,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  let settings = null;
-  try {
-    settings = await (prisma as any).siteSettings.findFirst();
-  } catch (error) {
-    // ignore
-  }
+  const settings = await getSiteSettings();
 
   return (
     <html lang="en" suppressHydrationWarning>
