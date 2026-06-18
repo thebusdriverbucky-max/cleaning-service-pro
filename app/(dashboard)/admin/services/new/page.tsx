@@ -80,9 +80,10 @@ export default function NewServicePage() {
               name="icon"
               type="text"
               required
-              placeholder="e.g. 🧹"
+              placeholder="e.g. 🧹, ✨, 🧽"
               className="w-full bg-white text-slate-900 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
+            <p className="text-xs text-slate-400 mt-1">For best results, use an emoji. It looks great on all devices.</p>
           </div>
 
           <div className="space-y-1">
