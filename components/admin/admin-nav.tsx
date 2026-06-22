@@ -13,6 +13,7 @@ export function AdminNav() {
     { href: '/admin/cleaners', icon: '👥', label: 'Cleaners' },
     { href: '/admin/customers', icon: '👤', label: 'Customers' },
     { href: '/admin/services', icon: '✨', label: 'Services' },
+    { href: '/admin/addons', icon: '🧊', label: 'Add-ons' },
     { href: '/admin/reviews', icon: '⭐', label: 'Reviews' },
     { href: '/admin/promo-codes', icon: '🏷️', label: 'Promo Codes' },
     { href: '/admin/settings', icon: '⚙️', label: 'Settings' },

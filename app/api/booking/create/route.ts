@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { calculateOrderPrice } from '@/lib/prices'
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const {
-      serviceSlug, areaSize, roomCount, scheduledDate, scheduledTime,
+      serviceSlug, areaSize, scheduledDate, scheduledTime,
       addressStreet, addressCity, addressPostal, specialRequests, accessNotes,
       paymentMethod, name, email, phone, promoCode,
+      bedroomsCount, bathroomsCount, kitchensCount, frequency, addons
     } = body
 
     if (!serviceSlug || !scheduledDate || !addressStreet || !addressCity || !email || !name) {
@@ -25,15 +27,17 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    let calculatedTotalPrice = service.basePrice
-    if (service.pricePerSqm && areaSize) {
-      const minArea = service.minArea || 0
-      const area = Math.max(parseFloat(areaSize), minArea)
-      calculatedTotalPrice = service.pricePerSqm * area
+    // Load add-ons from database to prevent price tampering
+    let selectedAddons: any[] = []
+    if (addons && Array.isArray(addons) && addons.length > 0) {
+      selectedAddons = await prisma.serviceAddon.findMany({
+        where: { id: { in: addons } }
+      })
     }
 
-    let calculatedDiscount = 0
-    let promoIdToIncrement: string | null = null
+    // Load promo code
+    let validPromoCode = null;
+    let promoIdToIncrement: string | null = null;
 
     if (promoCode) {
       const promo = await prisma.promoCode.findUnique({
@@ -43,9 +47,8 @@ export async function POST(req: NextRequest) {
         const isNotExpired = !promo.expiresAt || new Date(promo.expiresAt) >= new Date()
         const isUnderLimit = !promo.maxUses || promo.usedCount < promo.maxUses
         if (isNotExpired && isUnderLimit) {
-          calculatedDiscount = parseFloat(((calculatedTotalPrice * promo.discountValue) / 100).toFixed(2))
-          calculatedTotalPrice = Math.max(0, parseFloat((calculatedTotalPrice - calculatedDiscount).toFixed(2)))
-          promoIdToIncrement = promo.id
+          validPromoCode = promo;
+          promoIdToIncrement = promo.id;
         } else {
           return NextResponse.json({ error: 'Promo code is expired or usage limit reached' }, { status: 400 })
         }
@@ -54,14 +57,51 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Calculate Prices
+    const pricing = calculateOrderPrice({
+      service: {
+        basePrice: service.basePrice,
+        pricePerSqm: service.pricePerSqm,
+        minArea: service.minArea,
+        pricePerBedroom: service.pricePerBedroom,
+        pricePerBathroom: service.pricePerBathroom,
+        pricePerKitchen: service.pricePerKitchen,
+      },
+      areaSize: areaSize ? parseFloat(areaSize) : undefined,
+      bedroomsCount: bedroomsCount ? parseInt(bedroomsCount) : 0,
+      bathroomsCount: bathroomsCount ? parseInt(bathroomsCount) : 0,
+      kitchensCount: kitchensCount ? parseInt(kitchensCount) : 0,
+      addons: selectedAddons,
+      frequency: frequency || 'ONE_TIME',
+      promoCode: validPromoCode,
+    });
+
+    const parsedBedrooms = bedroomsCount ? parseInt(bedroomsCount) : 0;
+    const parsedBathrooms = bathroomsCount ? parseInt(bathroomsCount) : 0;
+    const parsedKitchens = kitchensCount ? parseInt(kitchensCount) : 0;
+    const legacyRoomCount = parsedBedrooms + parsedBathrooms + parsedKitchens;
+
+    // Serialize addons to save historical price info
+    const serializedAddons = selectedAddons.map(a => ({
+      id: a.id,
+      name: a.name,
+      price: a.price,
+      icon: a.icon
+    }));
+
     const order = await prisma.cleaningOrder.create({
       data: {
         userId: user.id,
         serviceTypeId: service.id,
         areaSize: areaSize ? parseFloat(areaSize) : null,
-        roomCount: roomCount ? parseInt(roomCount) : null,
+        roomCount: legacyRoomCount > 0 ? legacyRoomCount : null,
+        bedroomsCount: parsedBedrooms,
+        bathroomsCount: parsedBathrooms,
+        kitchensCount: parsedKitchens,
         scheduledDate: new Date(scheduledDate),
         scheduledTime,
+        frequency: frequency || 'ONE_TIME',
+        addons: serializedAddons,
         addressStreet,
         addressCity,
         addressPostal: addressPostal || null,
@@ -69,9 +109,9 @@ export async function POST(req: NextRequest) {
         accessNotes: accessNotes || null,
         paymentMethod: paymentMethod === 'CASH' ? 'CASH' : 'STRIPE',
         paymentStatus: 'UNPAID',
-        basePrice: service.basePrice,
-        discount: calculatedDiscount,
-        totalPrice: calculatedTotalPrice,
+        basePrice: pricing.subtotal,
+        discount: pricing.totalDiscount,
+        totalPrice: pricing.totalPrice,
         status: 'PENDING',
       },
     })
@@ -91,7 +131,6 @@ export async function POST(req: NextRequest) {
     }
 
     if (paymentMethod === 'CASH') {
-      // Send confirmation email for cash orders
       try {
         const fullOrder = await prisma.cleaningOrder.findUnique({
           where: { id: order.id },
@@ -99,6 +138,17 @@ export async function POST(req: NextRequest) {
         })
         if (fullOrder) {
           const { sendEmail } = await import('@/lib/email')
+
+          let roomsText = [];
+          if (parsedBedrooms) roomsText.push(`${parsedBedrooms} Bedrooms`);
+          if (parsedBathrooms) roomsText.push(`${parsedBathrooms} Bathrooms`);
+          if (parsedKitchens) roomsText.push(`${parsedKitchens} Kitchens`);
+          const roomsString = roomsText.length > 0 ? roomsText.join(', ') : 'Base configuration';
+
+          const addonsString = selectedAddons.length > 0
+            ? selectedAddons.map(a => `${a.icon || ''} ${a.name}`).join(', ')
+            : 'None';
+
           await sendEmail({
             to: email,
             subject: `📋 Booking Received — ${service.name}`,
@@ -108,14 +158,17 @@ export async function POST(req: NextRequest) {
               <p>Hi ${name}, your cleaning booking has been received.</p>
               <p><strong>Order:</strong> #${order.orderNumber.slice(0, 8).toUpperCase()}</p>
               <p><strong>Service:</strong> ${service.icon} ${service.name}</p>
+              <p><strong>Frequency:</strong> ${frequency || 'ONE_TIME'}</p>
+              <p><strong>Rooms:</strong> ${roomsString}</p>
+              <p><strong>Add-ons:</strong> ${addonsString}</p>
               <p><strong>Date:</strong> ${scheduledDate} at ${scheduledTime}</p>
               <p><strong>Address:</strong> ${addressStreet}, ${addressCity}</p>
-              <p><strong>Total:</strong> $${calculatedTotalPrice.toFixed(2)} — 💵 Cash on arrival</p>
+              <p><strong>Total:</strong> $${pricing.totalPrice.toFixed(2)} — 💵 Cash on arrival</p>
               <p style="color: #64748b; font-size: 14px;">Our team will confirm your booking shortly.</p>
             </div>
           `,
           })
-          // Notify admin
+
           const adminEmail = process.env.ADMIN_EMAIL
           if (adminEmail) {
             await sendEmail({
@@ -124,7 +177,7 @@ export async function POST(req: NextRequest) {
               html: `<p>New cash booking from ${name} (${email})</p>
                    <p>Service: ${service.name} | Date: ${scheduledDate} ${scheduledTime}</p>
                    <p>Address: ${addressStreet}, ${addressCity}</p>
-                   <p>Total: $${calculatedTotalPrice.toFixed(2)}</p>
+                   <p>Total: $${pricing.totalPrice.toFixed(2)}</p>
                    <a href="${process.env.NEXT_PUBLIC_APP_URL}/admin/orders">View in Admin →</a>`,
             })
           }
@@ -145,10 +198,10 @@ export async function POST(req: NextRequest) {
         price_data: {
           currency: 'usd',
           product_data: {
-            name: service.name,
+            name: `${service.name} (${frequency || 'One Time'})`,
             description: `${scheduledDate} at ${scheduledTime} — ${addressStreet}, ${addressCity}`,
           },
-          unit_amount: Math.round(calculatedTotalPrice * 100),
+          unit_amount: Math.round(pricing.totalPrice * 100),
         },
         quantity: 1,
       }],
@@ -169,4 +222,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: err.message || 'Internal error' }, { status: 500 })
   }
 }
-

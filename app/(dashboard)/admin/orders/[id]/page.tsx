@@ -25,13 +25,20 @@ export default async function OrderDetailPage({ params }: { params: { id: string
 
   if (!order) notFound()
 
-  // Load available cleaners for assignment
   const cleaners = await prisma.cleanerProfile.findMany({
     where: { isAvailable: true },
     include: { user: { select: { name: true, email: true } } },
   })
 
   const orderNum = order.orderNumber.slice(0, 8).toUpperCase()
+
+  const savedAddons = Array.isArray(order.addons) ? order.addons as Array<{ id: string, name: string, price: number, icon?: string }> : []
+
+  let roomsConfig = []
+  if (order.bedroomsCount) roomsConfig.push(`${order.bedroomsCount} Bed`)
+  if (order.bathroomsCount) roomsConfig.push(`${order.bathroomsCount} Bath`)
+  if (order.kitchensCount) roomsConfig.push(`${order.kitchensCount} Kitchen`)
+  const roomsString = roomsConfig.length > 0 ? roomsConfig.join(' • ') : (order.roomCount ? `${order.roomCount} Rooms (Legacy)` : null)
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
@@ -94,10 +101,10 @@ export default async function OrderDetailPage({ params }: { params: { id: string
                   <div className="font-medium">{order.areaSize} m²</div>
                 </div>
               )}
-              {order.roomCount && (
+              {roomsString && (
                 <div>
                   <div className="text-slate-400 text-xs mb-0.5">Rooms</div>
-                  <div className="font-medium">{order.roomCount}</div>
+                  <div className="font-medium">{roomsString}</div>
                 </div>
               )}
               <div>
@@ -109,16 +116,32 @@ export default async function OrderDetailPage({ params }: { params: { id: string
                 <div className="font-medium">{order.serviceType?.durationHours}h</div>
               </div>
             </div>
+
+            {/* Addons List */}
+            {savedAddons.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-slate-100">
+                <div className="text-slate-400 text-xs mb-2">Selected Add-ons</div>
+                <ul className="space-y-1">
+                  {savedAddons.map((addon, idx) => (
+                    <li key={idx} className="flex justify-between text-sm bg-slate-50 px-3 py-1.5 rounded-md">
+                      <span className="text-slate-700">{addon.icon} {addon.name}</span>
+                      <span className="font-medium text-slate-900">+${addon.price.toFixed(2)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             {order.specialRequests && (
-              <div className="mt-3 pt-3 border-t border-slate-100">
+              <div className="mt-4 pt-4 border-t border-slate-100">
                 <div className="text-slate-400 text-xs mb-1">Special Requests</div>
-                <div className="text-sm text-slate-700 bg-slate-50 rounded-lg p-2">{order.specialRequests}</div>
+                <div className="text-sm text-slate-700 bg-slate-50 rounded-lg p-3">{order.specialRequests}</div>
               </div>
             )}
             {order.accessNotes && (
               <div className="mt-3">
                 <div className="text-slate-400 text-xs mb-1">Access Notes</div>
-                <div className="text-sm text-slate-700 bg-amber-50 rounded-lg p-2">🔑 {order.accessNotes}</div>
+                <div className="text-sm text-slate-700 bg-amber-50 border border-amber-100 rounded-lg p-3">🔑 {order.accessNotes}</div>
               </div>
             )}
           </div>
@@ -149,32 +172,33 @@ export default async function OrderDetailPage({ params }: { params: { id: string
         <div className="space-y-4">
           {/* Pricing */}
           <div className="bg-white border border-slate-200 rounded-xl p-5">
-            <h2 className="font-semibold text-slate-700 mb-3">💰 Payment</h2>
+            <h2 className="font-semibold text-slate-700 mb-3">💰 Payment Summary</h2>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between text-slate-600">
-                <span>Base price</span>
+                <span>Subtotal (Base + Rooms + Addons)</span>
                 <span>${order.basePrice.toFixed(2)}</span>
               </div>
               {order.discount > 0 && (
-                <div className="flex justify-between text-green-600">
-                  <span>Discount</span>
+                <div className="flex justify-between text-emerald-600 font-medium">
+                  <span>Total Discount</span>
                   <span>−${order.discount.toFixed(2)}</span>
                 </div>
               )}
-              <div className="flex justify-between font-bold text-slate-900 border-t border-slate-100 pt-2">
-                <span>Total</span>
+              <div className="flex justify-between font-bold text-slate-900 border-t border-slate-100 pt-3 mt-1 text-base">
+                <span>Total Amount</span>
                 <span>${order.totalPrice.toFixed(2)}</span>
               </div>
-              <div className="pt-2 flex gap-2">
-                <span className={`text-xs px-2 py-1 rounded-full font-medium ${order.paymentMethod === 'STRIPE' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
+
+              <div className="pt-3 flex gap-2">
+                <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${order.paymentMethod === 'STRIPE' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'}`}>
                   {order.paymentMethod === 'STRIPE' ? '💳 Stripe' : '💵 Cash'}
                 </span>
-                <span className={`text-xs px-2 py-1 rounded-full font-medium ${order.paymentStatus === 'PAID' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}`}>
+                <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${order.paymentStatus === 'PAID' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}`}>
                   {order.paymentStatus}
                 </span>
               </div>
               {order.paidAt && (
-                <div className="text-xs text-slate-400">Paid at {new Date(order.paidAt).toLocaleString()}</div>
+                <div className="text-xs text-slate-400 mt-2">Paid at {new Date(order.paidAt).toLocaleString()}</div>
               )}
             </div>
           </div>

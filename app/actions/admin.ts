@@ -132,6 +132,9 @@ export async function updateService(id: string, data: Partial<{
   durationHours: number
   sortOrder: number
   isActive: boolean
+  pricePerBedroom: number | null
+  pricePerBathroom: number | null
+  pricePerKitchen: number | null
 }>) {
   await prisma.serviceType.update({ where: { id }, data })
   revalidatePath('/admin/services')
@@ -145,6 +148,39 @@ export async function deleteService(id: string) {
     data: { isActive: false },
   })
   revalidatePath('/admin/services')
+}
+
+// ---- PROMO CODES ----
+
+export async function createAddon(data: {
+  name: string
+  description?: string
+  price: number
+  icon?: string
+  serviceTypeId?: string | null
+}) {
+  await prisma.serviceAddon.create({ data })
+  revalidatePath('/admin/addons')
+  revalidatePath('/booking')
+}
+
+export async function updateAddon(id: string, data: Partial<{
+  name: string
+  description: string | null
+  price: number
+  icon: string | null
+  isActive: boolean
+  serviceTypeId: string | null
+}>) {
+  await prisma.serviceAddon.update({ where: { id }, data })
+  revalidatePath('/admin/addons')
+  revalidatePath('/booking')
+}
+
+export async function deleteAddon(id: string) {
+  await prisma.serviceAddon.delete({ where: { id } })
+  revalidatePath('/admin/addons')
+  revalidatePath('/booking')
 }
 
 // ---- PROMO CODES ----

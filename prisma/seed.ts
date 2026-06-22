@@ -12,6 +12,8 @@ async function main() {
       pricePerSqm: 0.8,
       durationHours: 3,
       sortOrder: 1,
+      pricePerBedroom: 25,
+      pricePerBathroom: 30,
     },
     {
       slug: 'deep',
@@ -22,6 +24,8 @@ async function main() {
       pricePerSqm: 1.5,
       durationHours: 6,
       sortOrder: 2,
+      pricePerBedroom: 35,
+      pricePerBathroom: 45,
     },
     {
       slug: 'move-in-out',
@@ -32,6 +36,8 @@ async function main() {
       pricePerSqm: 2.0,
       durationHours: 8,
       sortOrder: 3,
+      pricePerBedroom: 40,
+      pricePerBathroom: 50,
     },
     {
       slug: 'office',
@@ -72,6 +78,51 @@ async function main() {
       create: service,
     })
   }
+  console.log(`✅ Seeded ${services.length} service types`)
+
+  const addons = [
+    {
+      name: 'Inside Fridge',
+      description: 'Cleaning the interior of the refrigerator.',
+      price: 25,
+      icon: '🧊',
+    },
+    {
+      name: 'Inside Oven',
+      description: 'Cleaning the interior of the oven.',
+      price: 30,
+      icon: '🔥',
+    },
+    {
+      name: 'Inside Cabinets',
+      description: 'Wiping and cleaning inside all kitchen or bathroom cabinets.',
+      price: 40,
+      icon: '🚪',
+    },
+    {
+      name: 'Laundry & Folding',
+      description: 'Wash, dry, and fold one load of laundry.',
+      price: 20,
+      icon: '🧺',
+    },
+  ]
+
+  for (const addon of addons) {
+    // Using updateMany to avoid unique constraint errors on re-seeding
+    const existingAddon = await prisma.serviceAddon.findFirst({ where: { name: addon.name } });
+    if (existingAddon) {
+      await prisma.serviceAddon.update({
+        where: { id: existingAddon.id },
+        data: addon,
+      });
+    } else {
+      await prisma.serviceAddon.create({
+        data: addon,
+      });
+    }
+  }
+  console.log(`✅ Seeded ${addons.length} service add-ons`)
+
 
   // Default site settings
   const settings = [

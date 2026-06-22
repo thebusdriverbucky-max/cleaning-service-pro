@@ -1,5 +1,12 @@
 // File: lib/constants.ts
 
+export const FREQUENCY_DISCOUNTS: Record<string, number> = {
+  ONE_TIME: 0,
+  WEEKLY: 20,    // 20%
+  BIWEEKLY: 15,  // 15%
+  MONTHLY: 10,   // 10%
+};
+
 export const COUNTRIES = [
   { code: 'AF', name: 'Afghanistan' },
   { code: 'AL', name: 'Albania' },

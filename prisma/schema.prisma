@@ -93,6 +93,24 @@ model Address {
   orders     CleaningOrder[]
 }
 
+// =========================================
+// Новая модель дополнительных услуг (Add-ons)
+// ==========================================
+model ServiceAddon {
+  id            String       @id @default(cuid())
+  name          String
+  description   String?
+  price         Float
+  icon          String?      // Например, emoji " Fridge" 
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  // Привязка к типу услуги (если null, то опция глобальная и доступна везде)
+  serviceTypeId String?
+  serviceType   ServiceType? @relation(fields: [serviceTypeId], references: [id], onDelete: Cascade)
+}
+
 // ─── SERVICE TYPE (CMS managed) ──────────────────────────
 
 model ServiceType {
@@ -111,7 +129,14 @@ model ServiceType {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  // --- Новые поля для ценообразования по комнатам ---
+  pricePerBedroom  Float?       @default(0)
+  pricePerBathroom Float?       @default(0)
+  pricePerKitchen  Float?       @default(0)
+
+  // Связи
   orders       CleaningOrder[]
+  addons       ServiceAddon[]
 }
 
 // ─── CLEANER PROFILE ─────────────────────────────────────
@@ -143,7 +168,13 @@ model CleaningOrder {
 
   // Service details
   areaSize        Float?          // in m²
-  roomCount       Int?
+  roomCount       Int? // (legacy, for backwards compatibility)
+
+  // --- Новые поля для детального учета комнат ---
+  bedroomsCount   Int?            @default(1)
+  bathroomsCount  Int?            @default(1)
+  kitchensCount   Int?            @default(1)
+
   specialRequests String?
   accessNotes     String?         // how to get in
 
@@ -161,6 +192,9 @@ model CleaningOrder {
   basePrice       Float
   discount        Float           @default(0)
   totalPrice      Float
+
+  // --- Сохраненные допы (Денормализация в JSON для сохранения истории цен) ---
+  addons          Json?           // Массив объектов: [{ id: string, name: string, price: number, icon: string }]
 
   // Payment
   paymentMethod   PaymentMethod   @default(STRIPE)
