@@ -25,6 +25,11 @@ export default function BookingForm({ services, defaultService }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  const [promoCodeInput, setPromoCodeInput] = useState('')
+  const [appliedPromo, setAppliedPromo] = useState<{ code: string; discountValue: number } | null>(null)
+  const [promoError, setPromoError] = useState('')
+  const [promoLoading, setPromoLoading] = useState(false)
+
   const [form, setForm] = useState({
     serviceSlug: defaultService || services[0]?.slug || '',
     areaSize: '',
@@ -55,7 +60,41 @@ export default function BookingForm({ services, defaultService }: Props) {
     return selectedService.basePrice
   }
 
-  const totalPrice = calcPrice()
+  const basePriceValue = calcPrice()
+  const discountAmount = appliedPromo ? parseFloat((basePriceValue * (appliedPromo.discountValue / 100)).toFixed(2)) : 0
+  const totalPrice = Math.max(0, parseFloat((basePriceValue - discountAmount).toFixed(2)))
+
+  const handleApplyPromo = async () => {
+    if (!promoCodeInput) return
+    setPromoLoading(true)
+    setPromoError('')
+    try {
+      const res = await fetch('/api/promo/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: promoCodeInput }),
+      })
+      const data = await res.json()
+      if (res.ok && data.valid) {
+        setAppliedPromo({
+          code: promoCodeInput.toUpperCase(),
+          discountValue: data.discountValue,
+        })
+        setPromoCodeInput('')
+      } else {
+        setPromoError(data.error || 'Invalid promo code')
+      }
+    } catch (err) {
+      setPromoError('Failed to validate promo code')
+    } finally {
+      setPromoLoading(false)
+    }
+  }
+
+  const handleRemovePromo = () => {
+    setAppliedPromo(null)
+    setPromoError('')
+  }
 
   const update = (field: string, value: string) =>
     setForm(prev => ({ ...prev, [field]: value }))
@@ -67,7 +106,12 @@ export default function BookingForm({ services, defaultService }: Props) {
       const res = await fetch('/api/booking/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, totalPrice }),
+        body: JSON.stringify({
+          ...form,
+          totalPrice,
+          promoCode: appliedPromo?.code || undefined,
+          discount: discountAmount,
+        }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Something went wrong')
@@ -354,6 +398,36 @@ export default function BookingForm({ services, defaultService }: Props) {
               </div>
             </div>
 
+            {/* Promo Code Input */}
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-slate-700">Promo Code</label>
+              {appliedPromo ? (
+                <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2 text-sm text-emerald-800 font-medium">
+                  <span>🏷️ {appliedPromo.code} ({appliedPromo.discountValue}% off)</span>
+                  <button type="button" onClick={handleRemovePromo} className="text-emerald-600 hover:text-emerald-800 text-xs font-bold">Remove</button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Enter code (e.g. SUMMER20)"
+                    value={promoCodeInput}
+                    onChange={e => setPromoCodeInput(e.target.value.toUpperCase())}
+                    className="flex-1 bg-white text-slate-900 border border-slate-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 uppercase placeholder-slate-400"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleApplyPromo}
+                    disabled={promoLoading || !promoCodeInput}
+                    className="bg-slate-800 hover:bg-slate-900 disabled:bg-slate-200 text-white font-semibold px-4 py-2 rounded-lg text-sm transition-colors"
+                  >
+                    {promoLoading ? '...' : 'Apply'}
+                  </button>
+                </div>
+              )}
+              {promoError && <p className="text-red-500 text-xs mt-1">{promoError}</p>}
+            </div>
+
             {/* Order summary */}
             <div className="bg-emerald-50/50 rounded-xl p-4 space-y-2 text-sm">
               <div className="font-semibold text-slate-900 mb-3">Order Summary</div>
@@ -365,6 +439,12 @@ export default function BookingForm({ services, defaultService }: Props) {
                 <div className="flex justify-between text-slate-600">
                   <span>{form.areaSize}m² × ${selectedService.pricePerSqm}/m²</span>
                   <span>${(parseFloat(form.areaSize) * selectedService.pricePerSqm).toFixed(2)}</span>
+                </div>
+              )}
+              {appliedPromo && (
+                <div className="flex justify-between text-emerald-700 font-medium">
+                  <span>Discount ({appliedPromo.code})</span>
+                  <span>-${discountAmount.toFixed(2)}</span>
                 </div>
               )}
               <div className="flex justify-between text-slate-600">

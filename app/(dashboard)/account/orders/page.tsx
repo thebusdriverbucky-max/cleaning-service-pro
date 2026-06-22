@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import ReviewForm from '@/components/account/ReviewForm'
 
 const statusColors: Record<string, string> = {
   PENDING: 'bg-yellow-100 text-yellow-800',
@@ -25,6 +26,7 @@ export default async function AccountOrdersPage() {
     orderBy: { createdAt: 'desc' },
     include: {
       serviceType: { select: { name: true, icon: true } },
+      review: true,
     },
   })
 
@@ -82,6 +84,26 @@ export default async function AccountOrdersPage() {
             {order.specialRequests && (
               <div className="mt-3 pt-3 border-t border-slate-100 text-sm text-slate-500">
                 💬 {order.specialRequests}
+              </div>
+            )}
+
+            {/* Review Section */}
+            {order.status === 'COMPLETED' && (
+              <div className="mt-3 pt-3 border-t border-slate-100">
+                {order.review ? (
+                  <div className="bg-emerald-50/30 border border-emerald-100/50 rounded-xl p-3 text-sm">
+                    <div className="flex items-center gap-1 text-amber-400 font-bold mb-1">
+                      {'★'.repeat(order.review.rating)}
+                      <span className="text-slate-300">{'★'.repeat(5 - order.review.rating)}</span>
+                      <span className="text-slate-400 text-xs font-normal ml-1">My Review</span>
+                    </div>
+                    {order.review.comment && (
+                      <p className="text-slate-600 italic">"{order.review.comment}"</p>
+                    )}
+                  </div>
+                ) : (
+                  <ReviewForm orderId={order.id} />
+                )}
               </div>
             )}
           </div>

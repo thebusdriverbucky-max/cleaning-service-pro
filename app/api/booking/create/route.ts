@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
     const {
       serviceSlug, areaSize, roomCount, scheduledDate, scheduledTime,
       addressStreet, addressCity, addressPostal, specialRequests, accessNotes,
-      paymentMethod, totalPrice, name, email, phone,
+      paymentMethod, name, email, phone, promoCode,
     } = body
 
     if (!serviceSlug || !scheduledDate || !addressStreet || !addressCity || !email || !name) {
@@ -23,6 +23,35 @@ export async function POST(req: NextRequest) {
       user = await prisma.user.create({
         data: { email, name, phone: phone || null, role: 'CUSTOMER' },
       })
+    }
+
+    let calculatedTotalPrice = service.basePrice
+    if (service.pricePerSqm && areaSize) {
+      const minArea = service.minArea || 0
+      const area = Math.max(parseFloat(areaSize), minArea)
+      calculatedTotalPrice = service.pricePerSqm * area
+    }
+
+    let calculatedDiscount = 0
+    let promoIdToIncrement: string | null = null
+
+    if (promoCode) {
+      const promo = await prisma.promoCode.findUnique({
+        where: { code: promoCode.toUpperCase() },
+      })
+      if (promo && promo.isActive) {
+        const isNotExpired = !promo.expiresAt || new Date(promo.expiresAt) >= new Date()
+        const isUnderLimit = !promo.maxUses || promo.usedCount < promo.maxUses
+        if (isNotExpired && isUnderLimit) {
+          calculatedDiscount = parseFloat(((calculatedTotalPrice * promo.discountValue) / 100).toFixed(2))
+          calculatedTotalPrice = Math.max(0, parseFloat((calculatedTotalPrice - calculatedDiscount).toFixed(2)))
+          promoIdToIncrement = promo.id
+        } else {
+          return NextResponse.json({ error: 'Promo code is expired or usage limit reached' }, { status: 400 })
+        }
+      } else {
+        return NextResponse.json({ error: 'Promo code is invalid or inactive' }, { status: 400 })
+      }
     }
 
     const order = await prisma.cleaningOrder.create({
@@ -41,11 +70,18 @@ export async function POST(req: NextRequest) {
         paymentMethod: paymentMethod === 'CASH' ? 'CASH' : 'STRIPE',
         paymentStatus: 'UNPAID',
         basePrice: service.basePrice,
-        discount: 0,
-        totalPrice: parseFloat(totalPrice) || service.basePrice,
+        discount: calculatedDiscount,
+        totalPrice: calculatedTotalPrice,
         status: 'PENDING',
       },
     })
+
+    if (promoIdToIncrement) {
+      await prisma.promoCode.update({
+        where: { id: promoIdToIncrement },
+        data: { usedCount: { increment: 1 } },
+      })
+    }
 
     if (phone && user.id) {
       await prisma.user.update({
@@ -74,7 +110,7 @@ export async function POST(req: NextRequest) {
               <p><strong>Service:</strong> ${service.icon} ${service.name}</p>
               <p><strong>Date:</strong> ${scheduledDate} at ${scheduledTime}</p>
               <p><strong>Address:</strong> ${addressStreet}, ${addressCity}</p>
-              <p><strong>Total:</strong> $${parseFloat(totalPrice).toFixed(2)} — 💵 Cash on arrival</p>
+              <p><strong>Total:</strong> $${calculatedTotalPrice.toFixed(2)} — 💵 Cash on arrival</p>
               <p style="color: #64748b; font-size: 14px;">Our team will confirm your booking shortly.</p>
             </div>
           `,
@@ -88,7 +124,7 @@ export async function POST(req: NextRequest) {
               html: `<p>New cash booking from ${name} (${email})</p>
                    <p>Service: ${service.name} | Date: ${scheduledDate} ${scheduledTime}</p>
                    <p>Address: ${addressStreet}, ${addressCity}</p>
-                   <p>Total: $${parseFloat(totalPrice).toFixed(2)}</p>
+                   <p>Total: $${calculatedTotalPrice.toFixed(2)}</p>
                    <a href="${process.env.NEXT_PUBLIC_APP_URL}/admin/orders">View in Admin →</a>`,
             })
           }
@@ -112,7 +148,7 @@ export async function POST(req: NextRequest) {
             name: service.name,
             description: `${scheduledDate} at ${scheduledTime} — ${addressStreet}, ${addressCity}`,
           },
-          unit_amount: Math.round(parseFloat(totalPrice) * 100),
+          unit_amount: Math.round(calculatedTotalPrice * 100),
         },
         quantity: 1,
       }],

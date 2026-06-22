@@ -46,23 +46,46 @@ export async function createCleaner(data: {
   phone: string
   bio?: string
 }) {
-  const existing = await prisma.user.findUnique({ where: { email: data.email } })
-  if (existing) throw new Error('User with this email already exists')
+  const existing = await prisma.user.findUnique({
+    where: { email: data.email },
+    include: { cleanerProfile: true }
+  })
 
-  await prisma.user.create({
-    data: {
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      role: 'CLEANER',
-      isActive: true,
-      cleanerProfile: {
-        create: {
-          bio: data.bio
+  if (existing) {
+    if (existing.cleanerProfile) {
+      throw new Error('User with this email already exists and is already a cleaner')
+    }
+
+    await prisma.user.update({
+      where: { id: existing.id },
+      data: {
+        role: 'CLEANER',
+        name: data.name || existing.name,
+        phone: data.phone || existing.phone,
+        isActive: true,
+        cleanerProfile: {
+          create: {
+            bio: data.bio
+          }
         }
       }
-    },
-  })
+    })
+  } else {
+    await prisma.user.create({
+      data: {
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        role: 'CLEANER',
+        isActive: true,
+        cleanerProfile: {
+          create: {
+            bio: data.bio
+          }
+        }
+      },
+    })
+  }
   revalidatePath('/admin/cleaners')
 }
 
@@ -179,4 +202,16 @@ export async function bulkUpdateSettings(settings: Record<string, string>) {
   invalidateSettingsCache()
   revalidatePath('/')
   revalidatePath('/admin/settings')
+}
+
+// ---- REVIEWS ----
+
+export async function toggleReviewPublic(id: string, isPublic: boolean) {
+  await prisma.review.update({ where: { id }, data: { isPublic } })
+  revalidatePath('/admin/reviews')
+}
+
+export async function deleteReviewAction(id: string) {
+  await prisma.review.delete({ where: { id } })
+  revalidatePath('/admin/reviews')
 }
