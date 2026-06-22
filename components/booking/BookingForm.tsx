@@ -182,7 +182,7 @@ export default function BookingForm({ services, addons, defaultService }: Props)
   ]
 
   const Counter = ({ label, value, min = 0, onChange }: { label: string, value: number, min?: number, onChange: (v: number) => void }) => (
-    <div className="flex items-center justify-between p-3 border border-slate-200 rounded-xl bg-white">
+    <div className="flex items-center justify-between p-3 border border-slate-200 rounded-xl bg-transparent">
       <span className="font-medium text-slate-700">{label}</span>
       <div className="flex items-center gap-3">
         <button type="button" onClick={() => onChange(Math.max(min, value - 1))} className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition">-</button>
@@ -220,7 +220,7 @@ export default function BookingForm({ services, addons, defaultService }: Props)
               <h2 className="font-semibold text-slate-900 text-lg mb-4">Choose a Service</h2>
               <div className="grid grid-cols-1 gap-3">
                 {services.map(service => (
-                  <div key={service.slug} className={`border rounded-xl transition-colors ${form.serviceSlug === service.slug ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 bg-white'}`}>
+                  <div key={service.slug} className={`border rounded-xl transition-colors ${form.serviceSlug === service.slug ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 bg-transparent'}`}>
                     <label className="flex items-center gap-4 p-4 cursor-pointer">
                       <input
                         type="radio"
@@ -267,7 +267,7 @@ export default function BookingForm({ services, addons, defaultService }: Props)
               <h2 className="font-semibold text-slate-900 text-lg mb-4">Service Frequency</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {frequencies.map(freq => (
-                  <label key={freq.value} className={`relative flex flex-col items-center justify-center p-3 border-2 rounded-xl cursor-pointer transition-colors ${form.frequency === freq.value ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 bg-white hover:border-emerald-300'}`}>
+                  <label key={freq.value} className={`relative flex flex-col items-center justify-center p-3 border-2 rounded-xl cursor-pointer transition-colors ${form.frequency === freq.value ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 bg-transparent hover:border-emerald-300'}`}>
                     <input
                       type="radio"
                       name="frequency"
@@ -311,7 +311,7 @@ export default function BookingForm({ services, addons, defaultService }: Props)
                     placeholder="e.g. 75"
                     value={form.areaSize}
                     onChange={e => update('areaSize', e.target.value)}
-                    className="w-full bg-white text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full bg-transparent text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
               ) : null}
@@ -340,7 +340,7 @@ export default function BookingForm({ services, addons, defaultService }: Props)
                   {getAvailableAddons().map(addon => {
                     const isSelected = form.selectedAddonIds.includes(addon.id)
                     return (
-                      <label key={addon.id} className={`flex flex-col p-3 border rounded-xl cursor-pointer transition-colors ${isSelected ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
+                      <label key={addon.id} className={`flex flex-col p-3 border rounded-xl cursor-pointer transition-colors ${isSelected ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 bg-transparent hover:border-slate-300'}`}>
                         <input
                           type="checkbox"
                           checked={isSelected}
@@ -371,7 +371,7 @@ export default function BookingForm({ services, addons, defaultService }: Props)
                     min={new Date().toISOString().split('T')[0]}
                     value={form.scheduledDate}
                     onChange={e => update('scheduledDate', e.target.value)}
-                    className="w-full bg-white text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full bg-transparent text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
                 <div>
@@ -379,7 +379,7 @@ export default function BookingForm({ services, addons, defaultService }: Props)
                   <select
                     value={form.scheduledTime}
                     onChange={e => update('scheduledTime', e.target.value)}
-                    className="w-full bg-white text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full bg-transparent text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
                     {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'].map(t => (
                       <option key={t} value={t}>{t}</option>
@@ -400,7 +400,7 @@ export default function BookingForm({ services, addons, defaultService }: Props)
                     placeholder="123 Main St, Apt 4B"
                     value={form.addressStreet}
                     onChange={e => update('addressStreet', e.target.value)}
-                    className="w-full bg-white text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full bg-transparent text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
 
@@ -413,7 +413,7 @@ export default function BookingForm({ services, addons, defaultService }: Props)
                       placeholder="New York"
                       value={form.addressCity}
                       onChange={e => update('addressCity', e.target.value)}
-                      className="w-full bg-white text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-full bg-transparent text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
                   <div>
@@ -423,7 +423,7 @@ export default function BookingForm({ services, addons, defaultService }: Props)
                       placeholder="10001"
                       value={form.addressPostal}
                       onChange={e => update('addressPostal', e.target.value)}
-                      className="w-full bg-white text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-full bg-transparent text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
                 </div>
@@ -435,7 +435,7 @@ export default function BookingForm({ services, addons, defaultService }: Props)
                     placeholder="Doorbell code, key under mat, etc."
                     value={form.accessNotes}
                     onChange={e => update('accessNotes', e.target.value)}
-                    className="w-full bg-white text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full bg-transparent text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
 
@@ -446,14 +446,14 @@ export default function BookingForm({ services, addons, defaultService }: Props)
                     placeholder="Any specific areas to focus on, pets, allergies..."
                     value={form.specialRequests}
                     onChange={e => update('specialRequests', e.target.value)}
-                    className="w-full bg-white text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+                    className="w-full bg-transparent text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
                   />
                 </div>
               </div>
             </div>
 
             <div className="flex gap-3 mt-4">
-              <button onClick={() => setStep(1)} className="flex-1 border border-slate-200 text-slate-700 font-medium py-3 rounded-xl hover:bg-slate-50 transition-colors bg-white">
+              <button onClick={() => setStep(1)} className="flex-1 border border-slate-200 text-slate-700 font-medium py-3 rounded-xl hover:bg-slate-50 transition-colors bg-transparent">
                 ← Back
               </button>
               <button
@@ -487,7 +487,7 @@ export default function BookingForm({ services, addons, defaultService }: Props)
                   required
                   value={form.name}
                   onChange={e => update('name', e.target.value)}
-                  className="w-full bg-white text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full bg-transparent text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
               <div>
@@ -497,7 +497,7 @@ export default function BookingForm({ services, addons, defaultService }: Props)
                   required
                   value={form.email}
                   onChange={e => update('email', e.target.value)}
-                  className="w-full bg-white text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full bg-transparent text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
               <div>
@@ -511,7 +511,7 @@ export default function BookingForm({ services, addons, defaultService }: Props)
                   placeholder="+1 (555) 000-0000"
                   value={form.phone}
                   onChange={e => update('phone', e.target.value)}
-                  className="w-full bg-white text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full bg-transparent text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
                 <p className="text-xs text-slate-500 mt-1">We'll use this to confirm your appointment</p>
               </div>
@@ -521,13 +521,13 @@ export default function BookingForm({ services, addons, defaultService }: Props)
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-3">Payment Method</label>
               <div className="grid grid-cols-2 gap-3">
-                <label className={`flex flex-col items-center gap-2 p-4 border-2 rounded-xl cursor-pointer transition-colors ${form.paymentMethod === 'STRIPE' ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
+                <label className={`flex flex-col items-center gap-2 p-4 border-2 rounded-xl cursor-pointer transition-colors ${form.paymentMethod === 'STRIPE' ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 bg-transparent hover:border-slate-300'}`}>
                   <input type="radio" name="payment" value="STRIPE" checked={form.paymentMethod === 'STRIPE'} onChange={() => update('paymentMethod', 'STRIPE')} className="sr-only" />
                   <span className="text-2xl">💳</span>
                   <span className="font-medium text-sm text-slate-900">Pay Online</span>
                   <span className="text-xs text-slate-500">Stripe · Secure</span>
                 </label>
-                <label className={`flex flex-col items-center gap-2 p-4 border-2 rounded-xl cursor-pointer transition-colors ${form.paymentMethod === 'CASH' ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
+                <label className={`flex flex-col items-center gap-2 p-4 border-2 rounded-xl cursor-pointer transition-colors ${form.paymentMethod === 'CASH' ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 bg-transparent hover:border-slate-300'}`}>
                   <input type="radio" name="payment" value="CASH" checked={form.paymentMethod === 'CASH'} onChange={() => update('paymentMethod', 'CASH')} className="sr-only" />
                   <span className="text-2xl">💵</span>
                   <span className="font-medium text-sm text-slate-900">Cash on Site</span>
@@ -551,7 +551,7 @@ export default function BookingForm({ services, addons, defaultService }: Props)
                     placeholder="Enter code (e.g. SUMMER20)"
                     value={promoCodeInput}
                     onChange={e => setPromoCodeInput(e.target.value.toUpperCase())}
-                    className="flex-1 bg-white text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 uppercase placeholder-slate-400"
+                    className="flex-1 bg-transparent text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 uppercase placeholder-slate-400"
                   />
                   <button
                     type="button"
@@ -628,7 +628,7 @@ export default function BookingForm({ services, addons, defaultService }: Props)
             {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
             <div className="flex gap-3 mt-4">
-              <button onClick={() => setStep(2)} className="flex-1 border border-slate-200 text-slate-700 font-medium py-3 rounded-xl hover:bg-slate-50 transition-colors bg-white">
+              <button onClick={() => setStep(2)} className="flex-1 border border-slate-200 text-slate-700 font-medium py-3 rounded-xl hover:bg-slate-50 transition-colors bg-transparent">
                 ← Back
               </button>
               <button
