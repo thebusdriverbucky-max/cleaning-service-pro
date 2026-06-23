@@ -15,6 +15,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { getSiteSettings } from "@/lib/settings";
 import { SettingsProvider } from "@/components/providers/settings-provider";
 import { StoreSettingsData } from "@/app/actions/settings";
+import NextTopLoader from 'nextjs-toploader';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -64,6 +65,18 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
+        <NextTopLoader
+          color="#10b981"
+          initialPosition={0.08}
+          crawlSpeed={200}
+          height={3}
+          crawl={true}
+          showSpinner={false}
+          easing="ease"
+          speed={200}
+          shadow="0 0 10px #10b981,0 0 5px #10b981"
+          zIndex={99999}
+        />
         <SessionProvider>
           <SettingsProvider initialSettings={settings as unknown as StoreSettingsData}>
             <ThemeProvider attribute="class" defaultTheme="light" forcedTheme="light" enableSystem={false}>
