@@ -185,7 +185,7 @@ export default async function OrderDetailPage({ params }: { params: { id: string
                 </div>
               )}
               <div className="flex justify-between font-bold text-slate-900 border-t border-slate-100 pt-3 mt-1 text-base">
-                <span>Total Amount</span>
+                <span>Total Amount (First Session)</span>
                 <span>${order.totalPrice.toFixed(2)}</span>
               </div>
 
@@ -200,6 +200,26 @@ export default async function OrderDetailPage({ params }: { params: { id: string
               {order.paidAt && (
                 <div className="text-xs text-slate-400 mt-2">Paid at {new Date(order.paidAt).toLocaleString()}</div>
               )}
+
+              {(() => {
+                const freqDiscountPercent = order.frequency === 'WEEKLY' ? 20 : order.frequency === 'BIWEEKLY' ? 15 : order.frequency === 'MONTHLY' ? 10 : 0;
+                if (order.frequency !== 'ONE_TIME' && freqDiscountPercent > 0) {
+                  const futurePrice = order.basePrice * (1 - freqDiscountPercent / 100);
+                  return (
+                    <div className="pt-3 mt-3 border-t border-slate-100 space-y-1 bg-emerald-50/50 -mx-5 px-5 py-3 border-b border-emerald-100">
+                      <div className="text-xs font-medium text-emerald-800 uppercase tracking-wider mb-2">Recurring Schedule</div>
+                      <div className="flex justify-between text-slate-700 font-medium">
+                        <span>Future Cleanings Price</span>
+                        <span className="text-emerald-700">${futurePrice.toFixed(2)}</span>
+                      </div>
+                      <div className="text-[11px] text-slate-500 mt-1">
+                        Client paid first session at full price. You should charge future {order.frequency.toLowerCase()} cleanings with a {freqDiscountPercent}% discount.
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
             </div>
           </div>
 

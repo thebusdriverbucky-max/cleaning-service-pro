@@ -61,3 +61,22 @@ export function sanitizeInput(input: string): string {
     .replace(/[<>\"']/g, "")
     .substring(0, 500);
 }
+
+/**
+ * Escape user-provided text before inserting into HTML email templates
+ * to prevent HTML injection / broken layout in email clients.
+ */
+export function escapeHtml(input: unknown): string {
+  if (input == null) return "";
+  const amp = String.fromCharCode(38); // &
+  const lt = String.fromCharCode(60);  // <
+  const gt = String.fromCharCode(62);  // >
+  const quot = String.fromCharCode(34); // "
+  const apos = String.fromCharCode(39); // '
+  return String(input)
+    .replace(new RegExp(amp, "g"), amp + "amp;")
+    .replace(new RegExp(lt, "g"), amp + "lt;")
+    .replace(new RegExp(gt, "g"), amp + "gt;")
+    .replace(new RegExp(quot, "g"), amp + "quot;")
+    .replace(new RegExp(apos, "g"), amp + "#39;");
+}

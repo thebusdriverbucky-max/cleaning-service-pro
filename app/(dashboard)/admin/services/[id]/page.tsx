@@ -22,6 +22,10 @@ export default async function EditServicePage({ params }: Props) {
     const basePrice = parseFloat(formData.get('basePrice') as string)
     const pricePerSqmVal = formData.get('pricePerSqm') as string
     const pricePerSqm = pricePerSqmVal ? parseFloat(pricePerSqmVal) : null
+    const minAreaVal = formData.get('minArea') as string
+    const minArea = minAreaVal ? parseFloat(minAreaVal) : null
+    const maxAreaVal = formData.get('maxArea') as string
+    const maxArea = maxAreaVal ? parseFloat(maxAreaVal) : null
     const durationHours = parseFloat(formData.get('durationHours') as string)
     const sortOrder = parseInt(formData.get('sortOrder') as string)
     const pricePerBedroomVal = formData.get('pricePerBedroom') as string
@@ -37,6 +41,8 @@ export default async function EditServicePage({ params }: Props) {
       icon,
       basePrice,
       pricePerSqm,
+      minArea,
+      maxArea,
       durationHours,
       sortOrder,
       pricePerBedroom,
@@ -131,6 +137,36 @@ export default async function EditServicePage({ params }: Props) {
               step="0.01"
               defaultValue={service.pricePerSqm ?? ''}
               placeholder="e.g. 0.8"
+              className="w-full bg-white text-slate-900 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-slate-700">
+              Min Area (m²)
+              <span className="text-xs text-slate-400 block font-normal">Minimum area charged (e.g. 20)</span>
+            </label>
+            <input
+              name="minArea"
+              type="number"
+              step="0.01"
+              defaultValue={service.minArea ?? ''}
+              placeholder="e.g. 20"
+              className="w-full bg-white text-slate-900 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-slate-700">
+              Max Area (m²)
+              <span className="text-xs text-slate-400 block font-normal">Maximum allowed area (optional)</span>
+            </label>
+            <input
+              name="maxArea"
+              type="number"
+              step="0.01"
+              defaultValue={service.maxArea ?? ''}
+              placeholder="e.g. 500"
               className="w-full bg-white text-slate-900 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>

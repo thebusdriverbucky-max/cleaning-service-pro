@@ -7,6 +7,7 @@ export interface CalculateOrderPriceInput {
     basePrice: number;
     pricePerSqm: number | null;
     minArea: number | null;
+    maxArea: number | null;
     pricePerBedroom: number | null;
     pricePerBathroom: number | null;
     pricePerKitchen: number | null;
@@ -18,6 +19,11 @@ export interface CalculateOrderPriceInput {
   addons?: { price: number }[];
   frequency?: string;
   promoCode?: { discountType: string; discountValue: number } | null;
+  discounts?: {
+    weekly: number;
+    biweekly: number;
+    monthly: number;
+  };
 }
 
 export function calculateOrderPrice(input: CalculateOrderPriceInput) {
@@ -30,13 +36,20 @@ export function calculateOrderPrice(input: CalculateOrderPriceInput) {
     addons = [],
     frequency = "ONE_TIME",
     promoCode = null,
+    discounts = {
+      weekly: FREQUENCY_DISCOUNTS['WEEKLY'] || 20,
+      biweekly: FREQUENCY_DISCOUNTS['BIWEEKLY'] || 15,
+      monthly: FREQUENCY_DISCOUNTS['MONTHLY'] || 10,
+    }
   } = input;
 
   // 1. Базовая Цена Услуги
   let baseServicePrice = service.basePrice;
   if (service.pricePerSqm && areaSize > 0) {
     const minArea = service.minArea ?? 0;
-    const effectiveArea = Math.max(areaSize, minArea);
+    // Ограничиваем площадь сверху maxArea, если задано
+    const maxArea = service.maxArea && service.maxArea > 0 ? service.maxArea : Infinity;
+    const effectiveArea = Math.min(Math.max(areaSize, minArea), maxArea);
     baseServicePrice = effectiveArea * service.pricePerSqm;
   }
 
@@ -53,8 +66,13 @@ export function calculateOrderPrice(input: CalculateOrderPriceInput) {
   const subtotal = baseServicePrice + roomsPrice + addonsPrice;
 
   // 5. Скидка за Частоту
-  const frequencyDiscountPercent = FREQUENCY_DISCOUNTS[frequency] || 0;
-  const frequencyDiscountAmount = subtotal * (frequencyDiscountPercent / 100);
+  let frequencyDiscountPercent = 0;
+  if (frequency === "WEEKLY") frequencyDiscountPercent = discounts.weekly;
+  if (frequency === "BIWEEKLY") frequencyDiscountPercent = discounts.biweekly;
+  if (frequency === "MONTHLY") frequencyDiscountPercent = discounts.monthly;
+
+  // Скидка за частоту не применяется к первому платежу, только к будущим
+  const frequencyDiscountAmount = 0; // Для текущего платежа скидка за частоту 0
 
   // 6. Промежуточный Итог после Скидки Частоты
   const subtotalAfterFreq = subtotal - frequencyDiscountAmount;
@@ -74,11 +92,15 @@ export function calculateOrderPrice(input: CalculateOrderPriceInput) {
     promoDiscountAmount = subtotalAfterFreq;
   }
 
-  // 8. Итоговая Стоимость
+  // 8. Итоговая Стоимость (первая уборка)
   const totalPrice = subtotalAfterFreq - promoDiscountAmount;
 
   // 9. Общая Сумма Скидки
   const totalDiscount = frequencyDiscountAmount + promoDiscountAmount;
+
+  // Расчет стоимости для будущих уборок (с учетом скидки за частоту, но без промокода, так как обычно он одноразовый)
+  const futureDiscountAmount = subtotal * (frequencyDiscountPercent / 100);
+  const futurePrice = subtotal - futureDiscountAmount;
 
   return {
     baseServicePrice,
@@ -91,5 +113,6 @@ export function calculateOrderPrice(input: CalculateOrderPriceInput) {
     promoDiscountAmount,
     totalDiscount,
     totalPrice: Math.max(0, totalPrice),
+    futurePrice: Math.max(0, futurePrice),
   };
 }

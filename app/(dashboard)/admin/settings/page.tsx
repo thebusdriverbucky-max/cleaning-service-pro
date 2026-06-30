@@ -138,6 +138,16 @@ export default async function AdminSettingsPage({ searchParams }: Props) {
         ],
       },
     ],
+    pricing: [
+      {
+        label: '💳 Pricing & Discounts',
+        fields: [
+          { key: 'discount_weekly', label: 'Weekly Discount (%) - set to 0 to disable', type: 'number' },
+          { key: 'discount_biweekly', label: 'Biweekly Discount (%) - set to 0 to disable', type: 'number' },
+          { key: 'discount_monthly', label: 'Monthly Discount (%) - set to 0 to disable', type: 'number' },
+        ],
+      },
+    ],
   }
 
   async function handleGeneralSave(formData: FormData) {
@@ -327,6 +337,15 @@ export default async function AdminSettingsPage({ searchParams }: Props) {
                 }`}
             >
               🏢 Company Info
+            </Link>
+            <Link
+              href="/admin/settings?tab=content&subtab=pricing"
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors border ${currentSubTab === 'pricing'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900'
+                }`}
+            >
+              💳 Pricing & Discounts
             </Link>
           </div>
 

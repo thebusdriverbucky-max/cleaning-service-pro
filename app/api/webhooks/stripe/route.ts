@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { escapeHtml } from '@/lib/utils'
 
 export async function POST(req: NextRequest) {
   const body = await req.text()
@@ -89,21 +90,21 @@ function buildConfirmationEmail(order: any): string {
     <h1 style="color: white; margin: 0; font-size: 24px;">Booking Confirmed! 🎉</h1>
   </div>
   <div style="background: #f8fafc; padding: 24px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
-    <p style="font-size: 16px;">Hi ${order.user.name || 'there'},</p>
+    <p style="font-size: 16px;">Hi ${escapeHtml(order.user.name || 'there')},</p>
     <p>Your cleaning has been confirmed and payment received. Here's your booking summary:</p>
 
     <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 16px 0;">
       <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
-        <tr><td style="padding: 6px 0; color: #64748b;">Order #</td><td style="padding: 6px 0; font-weight: bold; font-family: monospace;">${order.orderNumber.slice(0, 8).toUpperCase()}</td></tr>
-        <tr><td style="padding: 6px 0; color: #64748b;">Service</td><td style="padding: 6px 0;">${order.serviceType.icon} ${order.serviceType.name}</td></tr>
-        <tr><td style="padding: 6px 0; color: #64748b;">Date</td><td style="padding: 6px 0;">${new Date(order.scheduledDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</td></tr>
-        <tr><td style="padding: 6px 0; color: #64748b;">Time</td><td style="padding: 6px 0;">${order.scheduledTime}</td></tr>
-        <tr><td style="padding: 6px 0; color: #64748b;">Address</td><td style="padding: 6px 0;">${order.addressStreet}, ${order.addressCity}</td></tr>
+        <tr><td style="padding: 6px 0; color: #64748b;">Order #</td><td style="padding: 6px 0; font-weight: bold; font-family: monospace;">${escapeHtml(order.orderNumber.slice(0, 8).toUpperCase())}</td></tr>
+        <tr><td style="padding: 6px 0; color: #64748b;">Service</td><td style="padding: 6px 0;">${escapeHtml(order.serviceType.icon)} ${escapeHtml(order.serviceType.name)}</td></tr>
+        <tr><td style="padding: 6px 0; color: #64748b;">Date</td><td style="padding: 6px 0;">${escapeHtml(new Date(order.scheduledDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }))}</td></tr>
+        <tr><td style="padding: 6px 0; color: #64748b;">Time</td><td style="padding: 6px 0;">${escapeHtml(order.scheduledTime)}</td></tr>
+        <tr><td style="padding: 6px 0; color: #64748b;">Address</td><td style="padding: 6px 0;">${escapeHtml(order.addressStreet)}, ${escapeHtml(order.addressCity)}</td></tr>
         <tr style="border-top: 1px solid #e2e8f0;"><td style="padding: 10px 0; font-weight: bold;">Total Paid</td><td style="padding: 10px 0; font-weight: bold; color: #059669; font-size: 18px;">$${order.totalPrice.toFixed(2)}</td></tr>
       </table>
     </div>
 
-    ${order.specialRequests ? `<p style="font-size: 14px; color: #64748b;"><strong>Special requests:</strong> ${order.specialRequests}</p>` : ''}
+    ${order.specialRequests ? `<p style="font-size: 14px; color: #64748b;"><strong>Special requests:</strong> ${escapeHtml(order.specialRequests)}</p>` : ''}
 
     <p style="font-size: 14px; color: #64748b;">If you have any questions, reply to this email or contact us directly.</p>
     <p style="font-size: 14px;">See you soon! 🧹</p>
@@ -114,21 +115,21 @@ function buildConfirmationEmail(order: any): string {
 
 function buildAdminNotificationEmail(order: any): string {
   return `
-<!DOCTYPE html>
-<html>
-<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <h2>🆕 New Paid Order</h2>
-  <p><strong>Order:</strong> #${order.orderNumber.slice(0, 8).toUpperCase()}</p>
-  <p><strong>Customer:</strong> ${order.user.name} (${order.user.email}) ${order.user.phone ? `· ${order.user.phone}` : ''}</p>
-  <p><strong>Service:</strong> ${order.serviceType.icon} ${order.serviceType.name}</p>
-  <p><strong>Date:</strong> ${new Date(order.scheduledDate).toLocaleDateString()} at ${order.scheduledTime}</p>
-  <p><strong>Address:</strong> ${order.addressStreet}, ${order.addressCity} ${order.addressPostal || ''}</p>
-  ${order.areaSize ? `<p><strong>Area:</strong> ${order.areaSize}m²</p>` : ''}
-  ${order.specialRequests ? `<p><strong>Special requests:</strong> ${order.specialRequests}</p>` : ''}
-  ${order.accessNotes ? `<p><strong>Access notes:</strong> ${order.accessNotes}</p>` : ''}
-  <p><strong>Total:</strong> $${order.totalPrice.toFixed(2)} — 💳 Paid via Stripe</p>
-  <hr>
-  <a href="${process.env.NEXT_PUBLIC_APP_URL}/admin/orders">View in Admin Dashboard →</a>
-</body>
-</html>`
+  <!DOCTYPE html>
+  <html>
+  <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <h2>🆕 New Paid Order</h2>
+    <p><strong>Order:</strong> #${escapeHtml(order.orderNumber.slice(0, 8).toUpperCase())}</p>
+    <p><strong>Customer:</strong> ${escapeHtml(order.user.name)} (${escapeHtml(order.user.email)}) ${order.user.phone ? `· ${escapeHtml(order.user.phone)}` : ''}</p>
+    <p><strong>Service:</strong> ${escapeHtml(order.serviceType.icon)} ${escapeHtml(order.serviceType.name)}</p>
+    <p><strong>Date:</strong> ${escapeHtml(new Date(order.scheduledDate).toLocaleDateString())} at ${escapeHtml(order.scheduledTime)}</p>
+    <p><strong>Address:</strong> ${escapeHtml(order.addressStreet)}, ${escapeHtml(order.addressCity)} ${escapeHtml(order.addressPostal || '')}</p>
+    ${order.areaSize ? `<p><strong>Area:</strong> ${escapeHtml(order.areaSize)}m²</p>` : ''}
+    ${order.specialRequests ? `<p><strong>Special requests:</strong> ${escapeHtml(order.specialRequests)}</p>` : ''}
+    ${order.accessNotes ? `<p><strong>Access notes:</strong> ${escapeHtml(order.accessNotes)}</p>` : ''}
+    <p><strong>Total:</strong> $${order.totalPrice.toFixed(2)} — 💳 Paid via Stripe</p>
+    <hr>
+    <a href="${process.env.NEXT_PUBLIC_APP_URL}/admin/orders">View in Admin Dashboard →</a>
+  </body>
+  </html>`
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { calculateOrderPrice } from '@/lib/prices'
 
@@ -14,6 +14,7 @@ type ServiceType = {
   pricePerSqm: number | null
   durationHours: number
   minArea?: number | null
+  maxArea?: number | null
   pricePerBedroom: number | null
   pricePerBathroom: number | null
   pricePerKitchen: number | null
@@ -32,10 +33,16 @@ type Props = {
   services: ServiceType[]
   addons: AddonType[]
   defaultService?: string
+  discounts: {
+    weekly: number;
+    biweekly: number;
+    monthly: number;
+  }
 }
 
-export default function BookingForm({ services, addons, defaultService }: Props) {
+export default function BookingForm({ services, addons, defaultService, discounts }: Props) {
   const router = useRouter()
+  const [isPending, startTransition] = useTransition()
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -97,6 +104,7 @@ export default function BookingForm({ services, addons, defaultService }: Props)
       basePrice: selectedService.basePrice,
       pricePerSqm: selectedService.pricePerSqm,
       minArea: selectedService.minArea || 0,
+      maxArea: selectedService.maxArea || null,
       pricePerBedroom: selectedService.pricePerBedroom,
       pricePerBathroom: selectedService.pricePerBathroom,
       pricePerKitchen: selectedService.pricePerKitchen,
@@ -165,7 +173,12 @@ export default function BookingForm({ services, addons, defaultService }: Props)
       if (form.paymentMethod === 'STRIPE' && data.checkoutUrl) {
         window.location.href = data.checkoutUrl
       } else {
-        router.push(`/booking/confirmation?order=${data.orderNumber}`)
+        // Оборачиваем навигацию в startTransition, чтобы NextTopLoader
+        // отследил переход на тяжёлый server component (confirmation page).
+        // Без этого pathname обновится только после рендера, и прогресс-бар не запустится.
+        startTransition(() => {
+          router.push(`/booking/confirmation?order=${data.orderNumber}`)
+        })
       }
     } catch (err: any) {
       setError(err.message)
@@ -176,9 +189,9 @@ export default function BookingForm({ services, addons, defaultService }: Props)
 
   const frequencies = [
     { value: 'ONE_TIME', label: 'Once', discount: 0 },
-    { value: 'WEEKLY', label: 'Weekly', discount: 20 },
-    { value: 'BIWEEKLY', label: 'Biweekly', discount: 15 },
-    { value: 'MONTHLY', label: 'Monthly', discount: 10 },
+    { value: 'WEEKLY', label: 'Weekly', discount: discounts.weekly },
+    { value: 'BIWEEKLY', label: 'Biweekly', discount: discounts.biweekly },
+    { value: 'MONTHLY', label: 'Monthly', discount: discounts.monthly },
   ]
 
   const Counter = ({ label, value, min = 0, onChange }: { label: string, value: number, min?: number, onChange: (v: number) => void }) => (
@@ -276,11 +289,20 @@ export default function BookingForm({ services, addons, defaultService }: Props)
                       onChange={() => update('frequency', freq.value)}
                       className="sr-only"
                     />
-                    <span className="font-medium text-slate-900 text-sm">{freq.label}</span>
-                    {freq.discount > 0 ? (
+                    <div className="flex items-center gap-1">
+                      <span className="font-medium text-slate-900 text-sm">{freq.label}</span>
+                      {freq.discount > 0 && (
+                        <div className="group relative flex items-center">
+                          <span className="text-slate-400 hover:text-slate-600 cursor-help text-xs">ℹ️</span>
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-2 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none z-10 transition-opacity text-center">
+                            First cleaning is always at full price to prevent fraud. Discount applies from the second cleaning.
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    {freq.discount > 0 && (
                       <span className="mt-1 text-xs font-semibold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">Save {freq.discount}%</span>
-                    ) : (
-                      <span className="mt-1 text-xs text-slate-500">No discount</span>
                     )}
                   </label>
                 ))}
@@ -308,11 +330,15 @@ export default function BookingForm({ services, addons, defaultService }: Props)
                   <input
                     type="number"
                     min={selectedService.minArea || 20}
+                    max={selectedService.maxArea || undefined}
                     placeholder="e.g. 75"
                     value={form.areaSize}
                     onChange={e => update('areaSize', e.target.value)}
                     className="w-full bg-transparent text-slate-900 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
+                  {selectedService.maxArea ? (
+                    <p className="text-xs text-slate-400 mt-1">Maximum area: {selectedService.maxArea} m²</p>
+                  ) : null}
                 </div>
               ) : null}
 
@@ -615,11 +641,37 @@ export default function BookingForm({ services, addons, defaultService }: Props)
                   <span>Date</span>
                   <span>{form.scheduledDate || 'Not set'} at {form.scheduledTime}</span>
                 </div>
-                <div className="border-t pt-3 flex justify-between font-bold text-slate-900 text-lg">
-                  <span>Total</span>
-                  <span className="text-emerald-600">${pricing.totalPrice.toFixed(2)}</span>
+                <div className="border-t pt-3 flex flex-col gap-1 font-bold text-slate-900 text-lg">
+                  <div className="flex justify-between items-center">
+                    <span>{form.frequency !== 'ONE_TIME' ? "Today's Charge:" : "Total"}</span>
+                    <span className="text-emerald-600">${pricing.totalPrice.toFixed(2)}</span>
+                  </div>
+                  {form.frequency !== 'ONE_TIME' && (
+                    <div className="text-xs font-normal text-slate-500 text-right -mt-1">(First time clean)</div>
+                  )}
+
+                  {form.frequency !== 'ONE_TIME' && pricing.frequencyDiscountPercent > 0 && (
+                    <>
+                      <div className="flex justify-between mt-3 text-[15px] text-slate-800 border-t border-slate-200/60 pt-3">
+                        <span className="flex items-center gap-1">
+                          Future Cleanings:
+                          <div className="group relative flex items-center">
+                            <span className="text-slate-400 hover:text-slate-600 cursor-help text-xs">ℹ️</span>
+                            <div className="absolute bottom-full left-0 mb-2 w-56 p-2 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none z-10 transition-opacity font-normal">
+                              The first cleaning takes more time and is charged at full price. Your subscription discount activates from the next visit.
+                              <div className="absolute top-full left-4 border-4 border-transparent border-t-slate-800"></div>
+                            </div>
+                          </div>
+                        </span>
+                        <span className="text-emerald-600 font-bold">${pricing.futurePrice.toFixed(2)}</span>
+                      </div>
+                      <div className="text-xs font-normal text-slate-500 text-right">
+                        (Includes {pricing.frequencyDiscountPercent}% {frequencies.find(f => f.value === form.frequency)?.label} discount)
+                      </div>
+                    </>
+                  )}
                 </div>
-                <div className="text-xs text-slate-500 text-center">
+                <div className="text-xs text-slate-500 text-center mt-2">
                   Payment: {form.paymentMethod === 'STRIPE' ? '💳 Online via Stripe' : '💵 Cash on arrival'}
                 </div>
               </div>
@@ -633,10 +685,10 @@ export default function BookingForm({ services, addons, defaultService }: Props)
               </button>
               <button
                 onClick={handleSubmit}
-                disabled={loading || !form.name || !form.email || !form.phone}
+                disabled={loading || isPending || !form.name || !form.email || !form.phone}
                 className="flex-1 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-300 text-white font-semibold py-3 rounded-xl transition-colors"
               >
-                {loading ? 'Processing...' : form.paymentMethod === 'STRIPE' ? 'Pay Now →' : 'Confirm Booking →'}
+                {loading ? 'Processing...' : isPending ? 'Redirecting...' : form.paymentMethod === 'STRIPE' ? 'Pay Now →' : 'Confirm Booking →'}
               </button>
             </div>
           </div>

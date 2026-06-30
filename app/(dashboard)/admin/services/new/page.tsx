@@ -11,9 +11,19 @@ export default function NewServicePage() {
     const icon = formData.get('icon') as string
     const basePrice = parseFloat(formData.get('basePrice') as string)
     const pricePerSqmVal = formData.get('pricePerSqm') as string
-    const pricePerSqm = pricePerSqmVal ? parseFloat(pricePerSqmVal) : undefined
+    const pricePerSqm = pricePerSqmVal ? parseFloat(pricePerSqmVal) : null
+    const minAreaVal = formData.get('minArea') as string
+    const minArea = minAreaVal ? parseFloat(minAreaVal) : null
+    const maxAreaVal = formData.get('maxArea') as string
+    const maxArea = maxAreaVal ? parseFloat(maxAreaVal) : null
     const durationHours = parseFloat(formData.get('durationHours') as string)
     const sortOrder = parseInt(formData.get('sortOrder') as string)
+    const pricePerBedroomVal = formData.get('pricePerBedroom') as string
+    const pricePerBedroom = pricePerBedroomVal ? parseFloat(pricePerBedroomVal) : null
+    const pricePerBathroomVal = formData.get('pricePerBathroom') as string
+    const pricePerBathroom = pricePerBathroomVal ? parseFloat(pricePerBathroomVal) : null
+    const pricePerKitchenVal = formData.get('pricePerKitchen') as string
+    const pricePerKitchen = pricePerKitchenVal ? parseFloat(pricePerKitchenVal) : null
 
     await createService({
       name,
@@ -22,8 +32,13 @@ export default function NewServicePage() {
       icon,
       basePrice,
       pricePerSqm,
+      minArea,
+      maxArea,
       durationHours,
       sortOrder,
+      pricePerBedroom,
+      pricePerBathroom,
+      pricePerKitchen,
     })
 
     redirect('/admin/services')
@@ -108,6 +123,76 @@ export default function NewServicePage() {
               type="number"
               step="0.01"
               placeholder="e.g. 0.8"
+              className="w-full bg-white text-slate-900 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-slate-700">
+              Min Area (m²)
+              <span className="text-xs text-slate-400 block font-normal">Minimum area charged (e.g. 20)</span>
+            </label>
+            <input
+              name="minArea"
+              type="number"
+              step="0.01"
+              placeholder="e.g. 20"
+              className="w-full bg-white text-slate-900 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-slate-700">
+              Max Area (m²)
+              <span className="text-xs text-slate-400 block font-normal">Maximum allowed area (optional)</span>
+            </label>
+            <input
+              name="maxArea"
+              type="number"
+              step="0.01"
+              placeholder="e.g. 500"
+              className="w-full bg-white text-slate-900 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-slate-700">
+              Price per Bedroom ($)
+              <span className="text-xs text-slate-400 block font-normal">Leave empty/0 to disable counter</span>
+            </label>
+            <input
+              name="pricePerBedroom"
+              type="number"
+              step="0.01"
+              placeholder="e.g. 25"
+              className="w-full bg-white text-slate-900 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-slate-700">
+              Price per Bathroom ($)
+              <span className="text-xs text-slate-400 block font-normal">Leave empty/0 to disable counter</span>
+            </label>
+            <input
+              name="pricePerBathroom"
+              type="number"
+              step="0.01"
+              placeholder="e.g. 30"
+              className="w-full bg-white text-slate-900 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-slate-700">
+              Price per Kitchen ($)
+              <span className="text-xs text-slate-400 block font-normal">Leave empty/0 to disable counter</span>
+            </label>
+            <input
+              name="pricePerKitchen"
+              type="number"
+              step="0.01"
+              placeholder="e.g. 40"
               className="w-full bg-white text-slate-900 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>

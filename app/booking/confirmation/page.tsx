@@ -25,12 +25,37 @@ export default async function ConfirmationPage({
     )
   }
 
-  // If paid via Stripe — update payment status
-  if (searchParams.session_id && order.paymentStatus === 'UNPAID') {
-    await prisma.cleaningOrder.update({
-      where: { id: order.id },
-      data: { paymentStatus: 'PAID', paidAt: new Date(), status: 'CONFIRMED' },
-    })
+  // SECURITY: Verify Stripe session via API before marking as paid.
+  // Never trust session_id from the URL alone — it can be spoofed.
+  // The authoritative source of truth is the Stripe webhook, but here we
+  // additionally verify the session to give the user immediate feedback.
+  if (searchParams.session_id && order.paymentStatus === 'UNPAID' && order.paymentMethod === 'STRIPE') {
+    try {
+      const stripe = (await import('stripe')).default
+      const stripeClient = new stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2024-06-20' as any })
+      const session = await stripeClient.checkout.sessions.retrieve(searchParams.session_id)
+
+      // Only mark as paid if the session is truly paid AND belongs to this order
+      if (
+        session.payment_status === 'paid' &&
+        session.metadata?.orderId === order.id &&
+        session.metadata?.orderNumber === order.orderNumber
+      ) {
+        await prisma.cleaningOrder.update({
+          where: { id: order.id },
+          data: {
+            paymentStatus: 'PAID',
+            paidAt: new Date(),
+            status: 'CONFIRMED',
+            ...(session.payment_intent ? { stripePaymentId: session.payment_intent as string } : {}),
+          },
+        })
+      }
+    } catch (err) {
+      // If Stripe verification fails, do NOT mark as paid.
+      // The webhook will reconcile the payment status later.
+      console.error('[confirmation] Stripe session verification failed:', err)
+    }
   }
 
   return (

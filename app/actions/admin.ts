@@ -2,15 +2,55 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { auth } from '@/lib/auth'
+import { OrderStatus } from '@prisma/client'
+
+// ─── AUTH GUARD ───────────────────────────────────────────
+// Все server actions в этом файле — административные.
+// Middleware защищает только страницы /admin, но НЕ server actions,
+// поэтому каждый action обязан явно проверять сессию и роль.
+async function requireAdmin() {
+  const session = await auth() as any
+  if (!session?.user || session.user.role !== 'ADMIN') {
+    throw new Error('Forbidden: admin access required')
+  }
+  return session
+}
+
+// Допустимые значения статуса заказа (enum из Prisma)
+const VALID_ORDER_STATUSES: OrderStatus[] = [
+  'PENDING',
+  'CONFIRMED',
+  'IN_PROGRESS',
+  'COMPLETED',
+  'CANCELLED',
+]
+
+function parseOrderStatus(value: string): OrderStatus | null {
+  const upper = (value || '').toUpperCase()
+  return VALID_ORDER_STATUSES.includes(upper as OrderStatus)
+    ? (upper as OrderStatus)
+    : null
+}
 
 // ---- ORDERS ----
 
 export async function updateOrderStatus(orderId: string, status: string) {
+  await requireAdmin()
+
+  const parsed = parseOrderStatus(status)
+  if (!parsed) {
+    throw new Error(`Invalid order status: ${status}`)
+  }
+
   await prisma.cleaningOrder.update({
     where: { id: orderId },
     data: {
-      status: status as any,
-      ...(status === 'COMPLETED' ? { completedAt: new Date() } : {}),
+      status: parsed,
+      ...(parsed === 'COMPLETED' ? { completedAt: new Date() } : {}),
+      ...(parsed === 'CANCELLED' ? { cancelledAt: new Date() } : {}),
+      ...(parsed === 'CONFIRMED' ? { confirmedAt: new Date() } : {}),
+      ...(parsed === 'IN_PROGRESS' ? { startedAt: new Date() } : {}),
     },
   })
   revalidatePath('/admin/orders')
@@ -18,6 +58,7 @@ export async function updateOrderStatus(orderId: string, status: string) {
 }
 
 export async function assignCleanerToOrder(orderId: string, cleanerId: string | null) {
+  await requireAdmin()
   // Assuming cleanerId is the ID of the CleanerProfile
   await prisma.cleaningOrder.update({
     where: { id: orderId },
@@ -28,6 +69,7 @@ export async function assignCleanerToOrder(orderId: string, cleanerId: string | 
 
 export async function assignCleaner(orderId: string, formData: FormData) {
   'use server'
+  await requireAdmin()
   const cleanerId = formData.get('cleanerId') as string
   if (!cleanerId) return
   await prisma.cleaningOrder.update({
@@ -46,6 +88,7 @@ export async function createCleaner(data: {
   phone: string
   bio?: string
 }) {
+  await requireAdmin()
   const existing = await prisma.user.findUnique({
     where: { email: data.email },
     include: { cleanerProfile: true }
@@ -90,6 +133,7 @@ export async function createCleaner(data: {
 }
 
 export async function toggleCleanerActive(cleanerId: string, isActive: boolean) {
+  await requireAdmin()
   await prisma.user.update({
     where: { id: cleanerId },
     data: { isActive },
@@ -98,6 +142,7 @@ export async function toggleCleanerActive(cleanerId: string, isActive: boolean) 
 }
 
 export async function deleteCleaner(cleanerId: string) {
+  await requireAdmin()
   await prisma.user.update({
     where: { id: cleanerId },
     data: { isActive: false },
@@ -113,10 +158,16 @@ export async function createService(data: {
   description: string
   icon: string
   basePrice: number
-  pricePerSqm?: number
+  pricePerSqm?: number | null
+  minArea?: number | null
+  maxArea?: number | null
   durationHours: number
   sortOrder: number
+  pricePerBedroom?: number | null
+  pricePerBathroom?: number | null
+  pricePerKitchen?: number | null
 }) {
+  await requireAdmin()
   await prisma.serviceType.create({ data })
   revalidatePath('/admin/services')
   revalidatePath('/services')
@@ -129,6 +180,8 @@ export async function updateService(id: string, data: Partial<{
   icon: string
   basePrice: number
   pricePerSqm: number | null
+  minArea: number | null
+  maxArea: number | null
   durationHours: number
   sortOrder: number
   isActive: boolean
@@ -136,6 +189,7 @@ export async function updateService(id: string, data: Partial<{
   pricePerBathroom: number | null
   pricePerKitchen: number | null
 }>) {
+  await requireAdmin()
   await prisma.serviceType.update({ where: { id }, data })
   revalidatePath('/admin/services')
   revalidatePath('/services')
@@ -143,6 +197,7 @@ export async function updateService(id: string, data: Partial<{
 }
 
 export async function deleteService(id: string) {
+  await requireAdmin()
   await prisma.serviceType.update({
     where: { id },
     data: { isActive: false },
@@ -150,7 +205,7 @@ export async function deleteService(id: string) {
   revalidatePath('/admin/services')
 }
 
-// ---- PROMO CODES ----
+// ---- ADDONS ----
 
 export async function createAddon(data: {
   name: string
@@ -159,6 +214,7 @@ export async function createAddon(data: {
   icon?: string
   serviceTypeId?: string | null
 }) {
+  await requireAdmin()
   await prisma.serviceAddon.create({ data })
   revalidatePath('/admin/addons')
   revalidatePath('/booking')
@@ -172,12 +228,14 @@ export async function updateAddon(id: string, data: Partial<{
   isActive: boolean
   serviceTypeId: string | null
 }>) {
+  await requireAdmin()
   await prisma.serviceAddon.update({ where: { id }, data })
   revalidatePath('/admin/addons')
   revalidatePath('/booking')
 }
 
 export async function deleteAddon(id: string) {
+  await requireAdmin()
   await prisma.serviceAddon.delete({ where: { id } })
   revalidatePath('/admin/addons')
   revalidatePath('/booking')
@@ -191,6 +249,7 @@ export async function createPromoCode(data: {
   maxUses?: number
   expiresAt?: string
 }) {
+  await requireAdmin()
   await prisma.promoCode.create({
     data: {
       code: data.code.toUpperCase(),
@@ -206,6 +265,7 @@ export async function createPromoCode(data: {
 }
 
 export async function togglePromoCode(id: string, isActive: boolean) {
+  await requireAdmin()
   await prisma.promoCode.update({ where: { id }, data: { isActive } })
   revalidatePath('/admin/promo-codes')
 }
@@ -213,6 +273,7 @@ export async function togglePromoCode(id: string, isActive: boolean) {
 // ---- SITE SETTINGS ----
 
 export async function updateSetting(key: string, value: string) {
+  await requireAdmin()
   const { invalidateSettingsCache } = await import('@/lib/settings')
   await prisma.siteSettings.upsert({
     where: { key },
@@ -225,6 +286,7 @@ export async function updateSetting(key: string, value: string) {
 }
 
 export async function bulkUpdateSettings(settings: Record<string, string>) {
+  await requireAdmin()
   const { invalidateSettingsCache } = await import('@/lib/settings')
   await Promise.all(
     Object.entries(settings).map(([key, value]) =>
@@ -243,11 +305,13 @@ export async function bulkUpdateSettings(settings: Record<string, string>) {
 // ---- REVIEWS ----
 
 export async function toggleReviewPublic(id: string, isPublic: boolean) {
+  await requireAdmin()
   await prisma.review.update({ where: { id }, data: { isPublic } })
   revalidatePath('/admin/reviews')
 }
 
 export async function deleteReviewAction(id: string) {
+  await requireAdmin()
   await prisma.review.delete({ where: { id } })
   revalidatePath('/admin/reviews')
 }

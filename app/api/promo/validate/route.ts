@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 export async function POST(req: NextRequest) {
   try {
+    // ─── RATE LIMIT ───────────────────────────────────────
+    // Защита от брутфорса промокодов
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'anonymous'
+    const { success: rateLimitOk } = await checkRateLimit(`promo:${ip}`, 'coupons')
+    if (!rateLimitOk) {
+      return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 })
+    }
+
     const { code } = await req.json()
-    if (!code) {
+    if (!code || typeof code !== 'string' || code.length > 50) {
       return NextResponse.json({ error: 'Code is required' }, { status: 400 })
     }
 
